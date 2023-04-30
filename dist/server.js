@@ -8,7 +8,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const products_1 = __importDefault(require("./routes/products"));
 const app = (0, express_1.default)();
-mongoose_1.default.connect("mongodb+srv://miniprojects:thenewpassword@projects.wpbsykb.mongodb.net/movies?retryWrites=true&w=majority");
+mongoose_1.default.connect("mongodb+srv://miniprojects:thenewpassword@projects.wpbsykb.mongodb.net/eCommerce?retryWrites=true&w=majority");
 const db = mongoose_1.default.connection;
 db.on("error", (error) => {
     console.log(error.message);
@@ -16,6 +16,8 @@ db.on("error", (error) => {
 db.once("open", () => {
     console.log("Connected to DB");
 });
+app.use(express_1.default.json({ limit: "50mb" }));
+app.use(express_1.default.urlencoded({ limit: "50mb" }));
 app.use((0, cors_1.default)());
 app.use("/shop", products_1.default);
 app.listen(8002, () => {

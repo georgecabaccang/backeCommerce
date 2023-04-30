@@ -7,7 +7,7 @@ import { IDBTypes } from "./types/DBTypes";
 const app = express();
 
 mongoose.connect(
-    "mongodb+srv://miniprojects:thenewpassword@projects.wpbsykb.mongodb.net/movies?retryWrites=true&w=majority"
+    "mongodb+srv://miniprojects:thenewpassword@projects.wpbsykb.mongodb.net/eCommerce?retryWrites=true&w=majority"
 );
 
 const db = mongoose.connection;
@@ -17,7 +17,8 @@ db.on("error", (error: IDBTypes) => {
 db.once("open", () => {
     console.log("Connected to DB");
 });
-
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb" }));
 app.use(cors());
 
 app.use("/shop", productRoutes);

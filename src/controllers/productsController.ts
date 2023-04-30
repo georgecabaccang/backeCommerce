@@ -1,4 +1,3 @@
-import { RequestHandler } from "express";
 import { Response, Request } from "express";
 import Product from "../models/productModel";
 
