@@ -31,7 +31,10 @@ const addProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const product = req.body;
         const newProduct = new productModel_1.default({
             productName: product.productName,
+            description: product.description,
             price: product.price,
+            discount: product.discount,
+            stock: product.stock,
             image: product.image,
         });
         yield newProduct.save();

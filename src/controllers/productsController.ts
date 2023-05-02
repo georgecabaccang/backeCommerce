@@ -1,5 +1,6 @@
 import { Response, Request } from "express";
 import Product from "../models/productModel";
+import { IProductModel } from "../types/ProductModel";
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
@@ -14,10 +15,13 @@ export const getProducts = async (req: Request, res: Response) => {
 
 export const addProducts = async (req: Request, res: Response) => {
     try {
-        const product = req.body;
+        const product: IProductModel = req.body;
         const newProduct = new Product({
             productName: product.productName,
+            description: product.description,
             price: product.price,
+            discount: product.discount,
+            stock: product.stock,
             image: product.image,
         });
 
