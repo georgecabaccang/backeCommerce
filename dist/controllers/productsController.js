@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addProducts = exports.getProducts = void 0;
+exports.getProductDetails = exports.addProducts = exports.getProducts = void 0;
 const productModel_1 = __importDefault(require("../models/productModel"));
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -44,3 +44,16 @@ const addProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.addProducts = addProducts;
+const getProductDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const productId = req.params._id;
+        const product = yield productModel_1.default.findById(productId);
+        res.send(product);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send({ message: error.message });
+        }
+    }
+});
+exports.getProductDetails = getProductDetails;

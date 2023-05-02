@@ -29,3 +29,15 @@ export const addProducts = async (req: Request, res: Response) => {
         }
     }
 };
+
+export const getProductDetails = async (req: Request, res: Response) => {
+    try {
+        const productId = req.params._id;
+        const product = await Product.findById(productId);
+        res.send(product);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send({ message: error.message });
+        }
+    }
+};
