@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
+import bcrypt from "bcrypt";
 import User from "../models/userModel";
 import Cart from "../models/cartModel";
 import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
-import Item from "../models/itemModel";
 
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -16,9 +16,10 @@ export const createUser = async (req: Request, res: Response) => {
         const newUserCart = await newCart.save();
 
         // Create new User
+        const hashedPassword = await bcrypt.hash(userDetails.password, 10);
         const newUser = new User<IUserModel>({
             username: userDetails.username,
-            password: userDetails.password,
+            password: hashedPassword,
             userCart: null,
         });
         const newRegisteredUser = await newUser.save();
