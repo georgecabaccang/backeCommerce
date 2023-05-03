@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 export interface IUserModel {
-    username: string;
+    email: string;
     password: string;
     userCart: Types.ObjectId | null;
 }

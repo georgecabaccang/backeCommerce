@@ -3,7 +3,7 @@ import { IUserModel } from "../types/UserModel";
 
 const userSchema = new Schema<IUserModel, Model<IUserModel>>(
     {
-        username: { type: String, required: true },
+        email: { type: String, required: true },
         password: { type: String, required: true },
         userCart: { type: Schema.Types.ObjectId, ref: "Cart" },
     },

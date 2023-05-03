@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import bcrypt, { hash } from "bcrypt";
 import User from "../models/userModel";
 import Cart from "../models/cartModel";
 import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
 
+// Create User
 export const createUser = async (req: Request, res: Response) => {
     try {
         // Create New Cart
@@ -18,7 +19,7 @@ export const createUser = async (req: Request, res: Response) => {
         // Create new User
         const hashedPassword = await bcrypt.hash(userDetails.password, 10);
         const newUser = new User<IUserModel>({
-            username: userDetails.username,
+            email: userDetails.email,
             password: hashedPassword,
             userCart: null,
         });
@@ -30,8 +31,39 @@ export const createUser = async (req: Request, res: Response) => {
         newRegisteredUser.userCart = newUserCart._id;
         await newRegisteredUser.save();
 
-        const qwioejqwe = [newUserCart, newRegisteredUser];
-        res.send(qwioejqwe);
+        res.send("user created");
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+};
+
+// Login User
+export const login = async (req: Request, res: Response) => {
+    try {
+        const userCredentials = req.body;
+        // Find user with entered Email
+        const user = await User.findOne<IUserModel>({
+            email: userCredentials.email,
+        });
+        if (!user) {
+            res.send("user not found");
+            return;
+        }
+
+        // Check if passwords match
+        const match = await bcrypt.compare(
+            userCredentials.password,
+            user.password
+        );
+        if (!match) {
+            res.send("incorrect password");
+            return;
+        }
+
+        // If everything is a-okay
+        res.send("login successful");
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);
