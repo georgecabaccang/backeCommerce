@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import productRoutes from "./routes/products";
 import { IDBTypes } from "./types/DBTypes";
+import userRoutes from "./routes/users";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
 app.use(cors());
 
+app.use("/user", userRoutes);
 app.use("/shop", productRoutes);
 
 app.listen(8002, () => {

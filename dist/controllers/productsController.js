@@ -12,8 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProductDetails = exports.addProducts = exports.getProducts = void 0;
+exports.createCart = exports.getProductDetails = exports.addProducts = exports.getProducts = void 0;
 const productModel_1 = __importDefault(require("../models/productModel"));
+const cartModel_1 = __importDefault(require("../models/cartModel"));
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const product = yield productModel_1.default.find();
@@ -60,3 +61,15 @@ const getProductDetails = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.getProductDetails = getProductDetails;
+// JUST FOR CREATE A TEMP CART
+const createCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newCart = new cartModel_1.default({
+            items: [],
+        });
+        yield newCart.save();
+        res.send(newCart);
+    }
+    catch (error) { }
+});
+exports.createCart = createCart;

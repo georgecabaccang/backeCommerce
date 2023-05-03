@@ -1,6 +1,8 @@
 import { Response, Request } from "express";
 import Product from "../models/productModel";
 import { IProductModel } from "../types/ProductModel";
+import Cart from "../models/cartModel";
+import { ICartModel } from "../types/CartModel";
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
@@ -44,4 +46,16 @@ export const getProductDetails = async (req: Request, res: Response) => {
             res.send({ message: error.message });
         }
     }
+};
+
+// JUST FOR CREATE A TEMP CART
+
+export const createCart = async (req: Request, res: Response) => {
+    try {
+        const newCart = new Cart({
+            items: [],
+        });
+        await newCart.save();
+        res.send(newCart);
+    } catch (error) {}
 };
