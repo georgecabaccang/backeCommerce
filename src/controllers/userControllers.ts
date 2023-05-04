@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
-import bcrypt, { hash } from "bcrypt";
+import bcrypt from "bcrypt";
 import User from "../models/userModel";
 import Cart from "../models/cartModel";
 import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
 import { token } from "../security/authentication";
+import RefreshToken from "../models/refreshTokenModel";
 
 // Create User
 export const createUser = async (req: Request, res: Response) => {
@@ -70,11 +71,17 @@ export const login = async (req: Request, res: Response) => {
             password: user.password,
         };
 
-        // create jwt token from authentication.ts
-        const accessToken = token(userPayload);
+        // create jwt tokens from authentication.ts
+        const tokens = token(userPayload);
+
+        // add refresh token to DB
+        const refrehsToken = new RefreshToken({
+            refreshToken: tokens?.refreshToken,
+        });
+        await refrehsToken.save();
 
         // Send Access Token of user back
-        res.send({ accessToken: accessToken });
+        res.send({ tokens: tokens });
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);

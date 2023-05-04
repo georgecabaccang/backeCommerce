@@ -1,14 +1,20 @@
 require("dotenv").config();
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { IUserModel } from "../types/UserModel";
 import { Request, Response, NextFunction } from "express";
 
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
 export const token = (user: IUserModel) => {
-    if (ACCESS_TOKEN) {
-        const accessToken = jwt.sign(user, ACCESS_TOKEN);
-        return accessToken;
+    if (ACCESS_TOKEN && REFRESH_TOKEN) {
+        const accessToken = jwt.sign(user, ACCESS_TOKEN, { expiresIn: "30s" });
+        const refreshToken = jwt.sign(user, REFRESH_TOKEN);
+        const tokens = {
+            accessToken,
+            refreshToken,
+        };
+        return tokens;
     }
 };
 

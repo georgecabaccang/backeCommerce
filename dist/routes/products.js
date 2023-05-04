@@ -6,9 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const productRoutes = express_1.default.Router();
 const productsController_1 = require("../controllers/productsController");
-const authentication_1 = require("../security/authentication");
 productRoutes.get("/", productsController_1.getProducts);
-productRoutes.get("/product/:_id", authentication_1.authToken, productsController_1.getProductDetails);
+productRoutes.get("/product/:_id", productsController_1.getProductDetails);
 productRoutes.post("/add-product", productsController_1.addProducts);
 // FOR CREATING TEMP CART
 productRoutes.post("/cart", productsController_1.createCart);

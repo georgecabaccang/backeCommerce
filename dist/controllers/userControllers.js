@@ -17,6 +17,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const authentication_1 = require("../security/authentication");
+const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
 // Create User
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -73,10 +74,15 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             email: user.email,
             password: user.password,
         };
-        // create jwt token from authentication.ts
-        const accessToken = (0, authentication_1.token)(userPayload);
+        // create jwt tokens from authentication.ts
+        const tokens = (0, authentication_1.token)(userPayload);
+        // add refresh token to DB
+        const refrehsToken = new refreshTokenModel_1.default({
+            refreshToken: tokens === null || tokens === void 0 ? void 0 : tokens.refreshToken,
+        });
+        yield refrehsToken.save();
         // Send Access Token of user back
-        res.send({ accessToken: accessToken });
+        res.send({ tokens: tokens });
     }
     catch (error) {
         if (error instanceof Error) {
