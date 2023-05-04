@@ -2,6 +2,7 @@ require("dotenv").config();
 import jwt from "jsonwebtoken";
 import { IUserModel } from "../types/UserModel";
 import { Request, Response, NextFunction } from "express";
+import { IRefreshToken } from "../types/jwt";
 
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
@@ -16,6 +17,10 @@ export const token = (user: IUserModel) => {
         };
         return tokens;
     }
+};
+
+export const refrehsToken = (refrehsToken: IRefreshToken) => {
+    
 };
 
 export const authToken = (req: Request, res: Response, next: NextFunction) => {
