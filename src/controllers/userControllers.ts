@@ -45,7 +45,7 @@ export const login = async (req: Request, res: Response) => {
     try {
         const userCredentials = req.body;
         // Find user with entered Email
-        const user = await User.findOne<IUserModel>({
+        const user = await User.findOne({
             email: userCredentials.email,
         });
         if (!user) {
@@ -65,6 +65,7 @@ export const login = async (req: Request, res: Response) => {
 
         // If everything is a-okay
         const userPayload = {
+            _id: user._id,
             email: user.email,
             password: user.password,
         };
@@ -73,7 +74,7 @@ export const login = async (req: Request, res: Response) => {
         const accessToken = token(userPayload);
 
         // Send Access Token of user back
-        res.send(accessToken);
+        res.send({ accessToken: accessToken });
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);

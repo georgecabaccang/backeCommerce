@@ -68,8 +68,15 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return;
         }
         // If everything is a-okay
-        const accessToken = (0, authentication_1.token)(user);
-        res.send(accessToken);
+        const userPayload = {
+            _id: user._id,
+            email: user.email,
+            password: user.password,
+        };
+        // create jwt token from authentication.ts
+        const accessToken = (0, authentication_1.token)(userPayload);
+        // Send Access Token of user back
+        res.send({ accessToken: accessToken });
     }
     catch (error) {
         if (error instanceof Error) {
