@@ -16,6 +16,7 @@ exports.login = exports.createUser = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
+const authentication_1 = require("../security/authentication");
 // Create User
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -53,19 +54,22 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userCredentials = req.body;
         // Find user with entered Email
-        const user = yield userModel_1.default.findOne({ emai: userCredentials.email });
+        const user = yield userModel_1.default.findOne({
+            email: userCredentials.email,
+        });
         if (!user) {
             res.send("user not found");
             return;
         }
         // Check if passwords match
-        const match = bcrypt_1.default.compare(userCredentials.password, user.password);
+        const match = yield bcrypt_1.default.compare(userCredentials.password, user.password);
         if (!match) {
             res.send("incorrect password");
             return;
         }
         // If everything is a-okay
-        res.send("login successful");
+        const accessToken = (0, authentication_1.token)(user);
+        res.send(accessToken);
     }
     catch (error) {
         if (error instanceof Error) {

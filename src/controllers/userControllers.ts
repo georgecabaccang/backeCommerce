@@ -4,6 +4,7 @@ import User from "../models/userModel";
 import Cart from "../models/cartModel";
 import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
+import { token } from "../security/authentication";
 
 // Create User
 export const createUser = async (req: Request, res: Response) => {
@@ -63,7 +64,16 @@ export const login = async (req: Request, res: Response) => {
         }
 
         // If everything is a-okay
-        res.send("login successful");
+        const userPayload = {
+            email: user.email,
+            password: user.password,
+        };
+
+        // create jwt token from authentication.ts
+        const accessToken = token(userPayload);
+
+        // Send Access Token of user back
+        res.send(accessToken);
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);
