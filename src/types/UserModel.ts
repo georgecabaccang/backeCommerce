@@ -7,7 +7,7 @@ export interface IUserModel {
     userCart?: Types.ObjectId | null;
 }
 
-export interface IUserModelForTokens extends JwtPayload {
+export interface IUserModelForTokensAndPayload extends JwtPayload {
     _id?: Types.ObjectId;
     email?: string;
     password?: string;

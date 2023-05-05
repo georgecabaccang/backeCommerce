@@ -3,11 +3,16 @@ import Cart from "../models/cartModel";
 import { ICartModel } from "../types/CartModel";
 import Item from "../models/itemModel";
 import { IItemModel } from "../types/ItemModel";
+import { JwtPayload } from "jsonwebtoken";
+import { IUserModelForTokensAndPayload } from "../types/UserModel";
 
 export const getUserCart = async (req: Request, res: Response) => {
     try {
-        const user = req.authenticatedUser;
-        res.send(user);
+        const user: IUserModelForTokensAndPayload = req.authenticatedUser as JwtPayload;
+        if (user._id) {
+            const cartOfUser = await Cart.findOne({ cartOwner: user._id });
+            return res.send(cartOfUser);
+        }
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }
