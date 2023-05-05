@@ -4,7 +4,7 @@ import User from "../models/userModel";
 import Cart from "../models/cartModel";
 import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
-import { token } from "../security/authentication";
+import { refreshToken, token } from "../security/authentication";
 import RefreshToken from "../models/refreshTokenModel";
 
 // Create User
@@ -55,10 +55,7 @@ export const login = async (req: Request, res: Response) => {
         }
 
         // Check if passwords match
-        const match = await bcrypt.compare(
-            userCredentials.password,
-            user.password
-        );
+        const match = await bcrypt.compare(userCredentials.password, user.password);
         if (!match) {
             res.send("incorrect password");
             return;
@@ -73,6 +70,10 @@ export const login = async (req: Request, res: Response) => {
 
         // create jwt tokens from authentication.ts
         const tokens = token(userPayload);
+
+        // check if tokens were created
+        if (tokens.accessToken === "no secret code given for token creation")
+            return res.send(tokens.accessToken);
 
         // add refresh token to DB
         const refrehsToken = new RefreshToken({
@@ -89,10 +90,14 @@ export const login = async (req: Request, res: Response) => {
     }
 };
 
-export const refreshLogin = (req: Request, res: Response) => {
+export const refreshLogin = async (req: Request, res: Response) => {
     try {
-        
-// STOPPED HERE@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        const refreshToken = req.body.refrehsToken;
+        if (!refreshToken) return res.send("no refresh token provided");
+        const validRefreshToken = await RefreshToken.findOne({ refreshToken: refreshToken });
+        if (!validRefreshToken) return res.send("refresh token not found");
+
+        refreshToken(refreshToken);
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);

@@ -1,13 +1,12 @@
 require("dotenv").config();
-import jwt from "jsonwebtoken";
-import { IUserModel } from "../types/UserModel";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { IUserModelForTokens } from "../types/UserModel";
 import { Request, Response, NextFunction } from "express";
-import { IRefreshToken } from "../types/jwt";
 
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
-export const token = (user: IUserModel) => {
+export const token = (user: IUserModelForTokens) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
         const accessToken = jwt.sign(user, ACCESS_TOKEN, { expiresIn: "30s" });
         const refreshToken = jwt.sign(user, REFRESH_TOKEN);
@@ -16,11 +15,24 @@ export const token = (user: IUserModel) => {
             refreshToken,
         };
         return tokens;
+    } else {
+        const tokens = {
+            accessToken: "no secret code given for token creation",
+            refreshToken: "no secret code given for token creation",
+        };
+        return tokens;
     }
 };
 
-export const refrehsToken = (refrehsToken: IRefreshToken) => {
-    
+export const refreshToken = (refreshToken: string) => {
+    if (REFRESH_TOKEN) {
+        const userDetails = jwt.verify(refreshToken, REFRESH_TOKEN) as JwtPayload;
+        //  Think about stuff here
+        // 
+        // 
+        // 
+        return token(userDetails);
+    }
 };
 
 export const authToken = (req: Request, res: Response, next: NextFunction) => {
