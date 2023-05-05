@@ -4,6 +4,7 @@ import cors from "cors";
 import productRoutes from "./routes/products";
 import { IDBTypes } from "./types/DBTypes";
 import userRoutes from "./routes/users";
+import cartsRoutes from "./routes/carts";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(cors());
 
 app.use("/user", userRoutes);
 app.use("/shop", productRoutes);
+app.use("/cart", cartsRoutes);
 
 app.listen(8002, () => {
     console.log("Port 8002");

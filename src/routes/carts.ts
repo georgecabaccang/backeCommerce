@@ -4,4 +4,6 @@ import { authToken } from "../security/authentication";
 
 const cartsRoutes = express.Router();
 
-cartsRoutes.get("/cart", authToken, getUserCart);
+cartsRoutes.get("/", authToken, getUserCart);
+
+export default cartsRoutes;
