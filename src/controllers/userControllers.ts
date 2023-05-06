@@ -122,3 +122,15 @@ export const refreshLogin = async (req: Request, res: Response) => {
         }
     }
 };
+
+export const logout = async (req: Request, res: Response) => {
+    try {
+        const refreshToken = req.body.refreshToken;
+        await RefreshToken.deleteOne({ refreshToken: refreshToken });
+        res.send("logout successful");
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+};
