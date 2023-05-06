@@ -3,15 +3,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authToken = exports.refreshToken = exports.token = void 0;
+exports.authToken = exports.refreshTokenFn = exports.token = void 0;
 require("dotenv").config();
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 const token = (user, loginTime) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
-        const accessToken = jsonwebtoken_1.default.sign(user, ACCESS_TOKEN, { expiresIn: loginTime }); // change this accordingly if testing
-        const refreshToken = jsonwebtoken_1.default.sign(user, REFRESH_TOKEN);
+        const accessToken = jsonwebtoken_1.default.sign(user, ACCESS_TOKEN, { expiresIn: "2m" }); // change expiresIn accordingly if testing
+        const refreshToken = jsonwebtoken_1.default.sign({ email: user.email }, REFRESH_TOKEN, {
+            expiresIn: "5m",
+        });
         const tokens = {
             accessToken,
             refreshToken,
@@ -27,17 +29,15 @@ const token = (user, loginTime) => {
     }
 };
 exports.token = token;
-const refreshToken = (refreshToken) => {
+const refreshTokenFn = (refreshToken, userEmail) => {
     if (REFRESH_TOKEN) {
         const userDetails = jsonwebtoken_1.default.verify(refreshToken, REFRESH_TOKEN);
-        //  Think about stuff here
-        //
-        //
-        //
-        return (0, exports.token)(userDetails);
+        if (userDetails.email != userEmail)
+            return "refresh token does not belong to current user";
+        return (0, exports.token)({ email: userDetails.email }, "5m");
     }
 };
-exports.refreshToken = refreshToken;
+exports.refreshTokenFn = refreshTokenFn;
 const authToken = (req, res, next) => {
     try {
         const header = req.headers.authorization;

@@ -126,7 +126,10 @@ export const refreshLogin = async (req: Request, res: Response) => {
 export const logout = async (req: Request, res: Response) => {
     try {
         const refreshToken = req.body.refreshToken;
-        await RefreshToken.deleteOne({ refreshToken: refreshToken });
+        const deleted = await RefreshToken.deleteOne({ refreshToken: refreshToken });
+        if (deleted.deletedCount === 0) {
+            return res.send(deleted.deletedCount);
+        }
         res.send("logout successful");
     } catch (error) {
         if (error instanceof Error) {

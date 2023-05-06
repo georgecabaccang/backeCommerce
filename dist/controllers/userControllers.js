@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refreshLogin = exports.login = exports.createUser = void 0;
+exports.logout = exports.refreshLogin = exports.login = exports.createUser = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
@@ -70,9 +70,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         // If everything is a-okay
         const userPayload = {
-            _id: user._id,
             email: user.email,
-            password: user.password,
         };
         // create jwt tokens from authentication.ts
         const tokens = (0, authentication_1.token)(userPayload, userCredentials.loginTime);
@@ -96,13 +94,31 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.login = login;
 const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const refreshToken = req.body.refrehsToken;
+        const refreshToken = req.body.refreshToken;
+        const userEmail = req.body.email;
+        // check if refresh token is provided and valid
         if (!refreshToken)
             return res.send("no refresh token provided");
         const validRefreshToken = yield refreshTokenModel_1.default.findOne({ refreshToken: refreshToken });
         if (!validRefreshToken)
             return res.send("refresh token not found");
-        refreshToken(refreshToken);
+        // Generate new tokens
+        const newTokens = (0, authentication_1.refreshTokenFn)(refreshToken, userEmail);
+        // check if newTokens return new tokens or string if user and refreshToken does not match
+        if (typeof newTokens == "string") {
+            return res.send(newTokens);
+        }
+        else {
+            const refrehsToken = new refreshTokenModel_1.default({
+                refreshToken: newTokens === null || newTokens === void 0 ? void 0 : newTokens.refreshToken,
+            });
+            // Delete old refresh token
+            yield refreshTokenModel_1.default.deleteOne({ refreshToken: refreshToken });
+            // save new refresh token to DB
+            yield refrehsToken.save();
+            // return new tokens to user
+            res.send(newTokens);
+        }
     }
     catch (error) {
         if (error instanceof Error) {
@@ -111,3 +127,16 @@ const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.refreshLogin = refreshLogin;
+const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const refreshToken = req.body.refreshToken;
+        yield refreshTokenModel_1.default.deleteOne({ refreshToken: refreshToken });
+        res.send("logout successful");
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+});
+exports.logout = logout;
