@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.createUser = void 0;
+exports.refreshLogin = exports.login = exports.createUser = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
@@ -75,7 +75,10 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             password: user.password,
         };
         // create jwt tokens from authentication.ts
-        const tokens = (0, authentication_1.token)(userPayload);
+        const tokens = (0, authentication_1.token)(userPayload, userCredentials.loginTime);
+        // check if tokens were created
+        if (tokens.accessToken === "no secret code given for token creation")
+            return res.send(tokens.accessToken);
         // add refresh token to DB
         const refrehsToken = new refreshTokenModel_1.default({
             refreshToken: tokens === null || tokens === void 0 ? void 0 : tokens.refreshToken,
@@ -91,3 +94,20 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.login = login;
+const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const refreshToken = req.body.refrehsToken;
+        if (!refreshToken)
+            return res.send("no refresh token provided");
+        const validRefreshToken = yield refreshTokenModel_1.default.findOne({ refreshToken: refreshToken });
+        if (!validRefreshToken)
+            return res.send("refresh token not found");
+        refreshToken(refreshToken);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+});
+exports.refreshLogin = refreshLogin;

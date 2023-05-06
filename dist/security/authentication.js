@@ -3,14 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authToken = exports.token = void 0;
+exports.authToken = exports.refreshToken = exports.token = void 0;
 require("dotenv").config();
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
-const token = (user) => {
+const token = (user, loginTime) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
-        const accessToken = jsonwebtoken_1.default.sign(user, ACCESS_TOKEN, { expiresIn: "30s" });
+        const accessToken = jsonwebtoken_1.default.sign(user, ACCESS_TOKEN, { expiresIn: loginTime }); // change this accordingly if testing
         const refreshToken = jsonwebtoken_1.default.sign(user, REFRESH_TOKEN);
         const tokens = {
             accessToken,
@@ -18,20 +18,41 @@ const token = (user) => {
         };
         return tokens;
     }
+    else {
+        const tokens = {
+            accessToken: "no secret code given for token creation",
+            refreshToken: "no secret code given for token creation",
+        };
+        return tokens;
+    }
 };
 exports.token = token;
+const refreshToken = (refreshToken) => {
+    if (REFRESH_TOKEN) {
+        const userDetails = jsonwebtoken_1.default.verify(refreshToken, REFRESH_TOKEN);
+        //  Think about stuff here
+        //
+        //
+        //
+        return (0, exports.token)(userDetails);
+    }
+};
+exports.refreshToken = refreshToken;
 const authToken = (req, res, next) => {
-    const header = req.headers.authorization;
-    const token = header && header.split(" ")[1];
-    if (!token)
-        return res.send("no token provided");
-    if (ACCESS_TOKEN) {
-        const userDetails = jsonwebtoken_1.default.verify(token, ACCESS_TOKEN);
-        req.authenticatedUser = userDetails;
-        next();
+    try {
+        const header = req.headers.authorization;
+        const token = header && header.split(" ")[1];
+        if (!token)
+            return res.send("no token provided");
+        if (ACCESS_TOKEN) {
+            const userDetails = jsonwebtoken_1.default.verify(token, ACCESS_TOKEN);
+            req.authenticatedUser = userDetails;
+            next();
+        }
+    }
+    catch (error) {
+        if (error instanceof Error)
+            return res.send(error.message);
     }
 };
 exports.authToken = authToken;
-// headers: {
-//     Authorization: `Bearer ${localStorage.getItem("token")}`,
-// },

@@ -11,7 +11,7 @@ export const getUserCart = async (req: Request, res: Response) => {
         const user: IUserModelForTokensAndPayload = req.authenticatedUser as JwtPayload;
         if (user._id) {
             const cartOfUser = await Cart.findOne({ cartOwner: user._id });
-            return res.send(cartOfUser);
+            return res.send(cartOfUser?.items);
         }
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);

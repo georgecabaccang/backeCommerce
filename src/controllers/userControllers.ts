@@ -4,7 +4,7 @@ import User from "../models/userModel";
 import Cart from "../models/cartModel";
 import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
-import { refreshToken, token } from "../security/authentication";
+import { refreshTokenFn, token } from "../security/authentication";
 import RefreshToken from "../models/refreshTokenModel";
 
 // Create User
@@ -63,13 +63,11 @@ export const login = async (req: Request, res: Response) => {
 
         // If everything is a-okay
         const userPayload = {
-            _id: user._id,
             email: user.email,
-            password: user.password,
         };
 
         // create jwt tokens from authentication.ts
-        const tokens = token(userPayload);
+        const tokens = token(userPayload, userCredentials.loginTime);
 
         // check if tokens were created
         if (tokens.accessToken === "no secret code given for token creation")
@@ -92,12 +90,32 @@ export const login = async (req: Request, res: Response) => {
 
 export const refreshLogin = async (req: Request, res: Response) => {
     try {
-        const refreshToken = req.body.refrehsToken;
+        const refreshToken = req.body.refreshToken;
+        const userEmail = req.body.email;
+        // check if refresh token is provided and valid
         if (!refreshToken) return res.send("no refresh token provided");
         const validRefreshToken = await RefreshToken.findOne({ refreshToken: refreshToken });
         if (!validRefreshToken) return res.send("refresh token not found");
 
-        refreshToken(refreshToken);
+        // Generate new tokens
+        const newTokens = refreshTokenFn(refreshToken, userEmail);
+
+        // check if newTokens return new tokens or string if user and refreshToken does not match
+        if (typeof newTokens == "string") {
+            return res.send(newTokens);
+        } else {
+            const refrehsToken = new RefreshToken({
+                refreshToken: newTokens?.refreshToken,
+            });
+            // Delete old refresh token
+            await RefreshToken.deleteOne({ refreshToken: refreshToken });
+
+            // save new refresh token to DB
+            await refrehsToken.save();
+
+            // return new tokens to user
+            res.send(newTokens);
+        }
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);

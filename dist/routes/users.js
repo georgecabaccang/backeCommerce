@@ -9,4 +9,5 @@ const userRoutes = express_1.default.Router();
 userRoutes.get("/all-users");
 userRoutes.post("/register", userControllers_1.createUser);
 userRoutes.post("/login", userControllers_1.login);
+userRoutes.post("/refreshlogin", userControllers_1.refreshLogin);
 exports.default = userRoutes;
