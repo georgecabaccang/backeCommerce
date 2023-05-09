@@ -8,9 +8,9 @@ const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
 export const token = (user: IUserModelForTokensAndPayload, loginTime: string) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
-        const accessToken = jwt.sign(user, ACCESS_TOKEN, { expiresIn: "2m" }); // change expiresIn accordingly if testing
-        const refreshToken = jwt.sign({ email: user.email }, REFRESH_TOKEN, {
-            expiresIn: "5m",
+        const accessToken = jwt.sign(user, ACCESS_TOKEN, { expiresIn: "10m" }); // change expiresIn accordingly if testing
+        const refreshToken = jwt.sign({ email: user.email, _id: user._id }, REFRESH_TOKEN, {
+            expiresIn: "15m",
         });
         const tokens = {
             accessToken,
@@ -41,8 +41,8 @@ export const authToken = (req: Request, res: Response, next: NextFunction) => {
         if (!token) return res.send("no token provided");
 
         if (ACCESS_TOKEN) {
-            const userDetails = jwt.verify(token, ACCESS_TOKEN);
-            req.authenticatedUser = userDetails;
+            const userDetails = jwt.verify(token, ACCESS_TOKEN) as JwtPayload;
+            req.authenticatedUser = { email: userDetails.email, _id: userDetails._id };
             next();
         }
     } catch (error) {

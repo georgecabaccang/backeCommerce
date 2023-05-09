@@ -64,6 +64,7 @@ export const login = async (req: Request, res: Response) => {
         // If everything is a-okay
         const userPayload = {
             email: user.email,
+            _id: user._id,
         };
 
         // create jwt tokens from authentication.ts

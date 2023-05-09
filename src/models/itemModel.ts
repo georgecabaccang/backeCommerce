@@ -3,7 +3,6 @@ import { IItemModel } from "../types/ItemModel";
 
 const itemSchema = new Schema<IItemModel, Model<IItemModel>>({
     productName: { type: String, required: true },
-    description: { type: String, required: true },
     price: { type: Number, required: true },
     discount: { type: Number, required: true },
     stock: { type: Number, required: true },
