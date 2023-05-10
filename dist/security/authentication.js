@@ -8,11 +8,11 @@ require("dotenv").config();
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
-const token = (user, loginTime) => {
+const token = (user) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
-        const accessToken = jsonwebtoken_1.default.sign(user, ACCESS_TOKEN, { expiresIn: "2m" }); // change expiresIn accordingly if testing
-        const refreshToken = jsonwebtoken_1.default.sign({ email: user.email }, REFRESH_TOKEN, {
-            expiresIn: "5m",
+        const accessToken = jsonwebtoken_1.default.sign(user, ACCESS_TOKEN, { expiresIn: "10m" }); // change expiresIn accordingly if testing
+        const refreshToken = jsonwebtoken_1.default.sign({ email: user.email, _id: user._id }, REFRESH_TOKEN, {
+            expiresIn: "15m",
         });
         const tokens = {
             accessToken,
@@ -34,7 +34,7 @@ const refreshTokenFn = (refreshToken, userEmail) => {
         const userDetails = jsonwebtoken_1.default.verify(refreshToken, REFRESH_TOKEN);
         if (userDetails.email != userEmail)
             return "refresh token does not belong to current user";
-        return (0, exports.token)({ email: userDetails.email }, "5m");
+        return (0, exports.token)({ email: userDetails.email, _id: userDetails._id });
     }
 };
 exports.refreshTokenFn = refreshTokenFn;
@@ -46,7 +46,7 @@ const authToken = (req, res, next) => {
             return res.send("no token provided");
         if (ACCESS_TOKEN) {
             const userDetails = jsonwebtoken_1.default.verify(token, ACCESS_TOKEN);
-            req.authenticatedUser = userDetails;
+            req.authenticatedUser = { email: userDetails.email, _id: userDetails._id };
             next();
         }
     }

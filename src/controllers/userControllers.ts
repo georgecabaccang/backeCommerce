@@ -68,7 +68,7 @@ export const login = async (req: Request, res: Response) => {
         };
 
         // create jwt tokens from authentication.ts
-        const tokens = token(userPayload, userCredentials.loginTime);
+        const tokens = token(userPayload);
 
         // check if tokens were created
         if (tokens.accessToken === "no secret code given for token creation")
@@ -128,10 +128,7 @@ export const logout = async (req: Request, res: Response) => {
     try {
         const refreshToken = req.body.refreshToken;
         const deleted = await RefreshToken.deleteOne({ refreshToken: refreshToken });
-        if (deleted.deletedCount === 0) {
-            return res.send(deleted.deletedCount);
-        }
-        res.send("logout successful");
+        res.send(deleted);
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);

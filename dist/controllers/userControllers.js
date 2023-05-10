@@ -71,9 +71,10 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         // If everything is a-okay
         const userPayload = {
             email: user.email,
+            _id: user._id,
         };
         // create jwt tokens from authentication.ts
-        const tokens = (0, authentication_1.token)(userPayload, userCredentials.loginTime);
+        const tokens = (0, authentication_1.token)(userPayload);
         // check if tokens were created
         if (tokens.accessToken === "no secret code given for token creation")
             return res.send(tokens.accessToken);
@@ -130,8 +131,11 @@ exports.refreshLogin = refreshLogin;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.body.refreshToken;
-        yield refreshTokenModel_1.default.deleteOne({ refreshToken: refreshToken });
-        res.send("logout successful");
+        const deleted = yield refreshTokenModel_1.default.deleteOne({ refreshToken: refreshToken });
+        if (deleted.deletedCount === 0) {
+            return res.send(deleted.deletedCount);
+        }
+        res.send(deleted.deletedCount);
     }
     catch (error) {
         if (error instanceof Error) {

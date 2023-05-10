@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addToCart = exports.getUserCart = void 0;
 const cartModel_1 = __importDefault(require("../models/cartModel"));
-const itemModel_1 = __importDefault(require("../models/itemModel"));
+const productModel_1 = __importDefault(require("../models/productModel"));
 const getUserCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.authenticatedUser;
@@ -32,7 +32,28 @@ exports.getUserCart = getUserCart;
 const addToCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const itemToCart = req.body;
-        const addItemToCart = new itemModel_1.default({});
+        // Find product in database
+        const product = yield productModel_1.default.findOne({ _id: itemToCart.productID });
+        // Get user's cart
+        const userCart = yield cartModel_1.default.findOne({ cartOwner: req.authenticatedUser._id });
+        if (userCart) {
+            if (product) {
+                // create object with product's properties
+                const addItemToCart = {
+                    productName: product.productName,
+                    price: product.price,
+                    image: product.image,
+                    stock: product.stock,
+                    discount: product.discount,
+                    productID: itemToCart.productID,
+                    quantity: itemToCart.quantity,
+                };
+                // push item to user's cart items array
+                userCart === null || userCart === void 0 ? void 0 : userCart.items.push(addItemToCart);
+                yield userCart.save();
+                res.send(userCart);
+            }
+        }
     }
     catch (error) {
         if (error instanceof Error)

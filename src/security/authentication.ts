@@ -6,7 +6,7 @@ import { Request, Response, NextFunction } from "express";
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
-export const token = (user: IUserModelForTokensAndPayload, loginTime: string) => {
+export const token = (user: IUserModelForTokensAndPayload) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
         const accessToken = jwt.sign(user, ACCESS_TOKEN, { expiresIn: "10m" }); // change expiresIn accordingly if testing
         const refreshToken = jwt.sign({ email: user.email, _id: user._id }, REFRESH_TOKEN, {
@@ -30,7 +30,7 @@ export const refreshTokenFn = (refreshToken: string, userEmail: string) => {
     if (REFRESH_TOKEN) {
         const userDetails = jwt.verify(refreshToken, REFRESH_TOKEN) as JwtPayload;
         if (userDetails.email != userEmail) return "refresh token does not belong to current user";
-        return token({ email: userDetails.email }, "5m");
+        return token({ email: userDetails.email, _id: userDetails._id });
     }
 };
 

@@ -10,5 +10,5 @@ userRoutes.get("/all-users");
 userRoutes.post("/register", userControllers_1.createUser);
 userRoutes.post("/login", userControllers_1.login);
 userRoutes.post("/refreshlogin", userControllers_1.refreshLogin);
-userRoutes.delete("/logout", userControllers_1.logout);
+userRoutes.post("/logout", userControllers_1.logout);
 exports.default = userRoutes;

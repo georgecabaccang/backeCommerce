@@ -22,11 +22,14 @@ export const getUserCart = async (req: Request, res: Response) => {
 export const addToCart = async (req: Request, res: Response) => {
     try {
         const itemToCart: IItemModel = req.body;
+        // Find product in database
         const product = await Product.findOne<IItemModel>({ _id: itemToCart.productID });
+        // Get user's cart
         const userCart = await Cart.findOne({ cartOwner: req.authenticatedUser._id });
 
         if (userCart) {
             if (product) {
+                // create object with product's properties
                 const addItemToCart: IItemModel = {
                     productName: product.productName,
                     price: product.price,
@@ -37,9 +40,10 @@ export const addToCart = async (req: Request, res: Response) => {
                     quantity: itemToCart.quantity,
                 };
 
+                // push item to user's cart items array
                 userCart?.items.push(addItemToCart);
                 await userCart.save();
-
+                
                 res.send(userCart);
             }
         }
