@@ -14,6 +14,7 @@ export const getUserCart = async (req: Request, res: Response) => {
             const cartOfUser = await Cart.findOne({ cartOwner: user._id });
             return res.send(cartOfUser?.items);
         }
+        return res.sendStatus(404);
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }
@@ -56,11 +57,39 @@ export const addToCart = async (req: Request, res: Response) => {
                     userCart?.items.push(addItemToCart);
                 }
 
+                // save updated cart
                 await userCart.save();
-
-                res.send(userCart);
+                return res.sendStatus(200);
             }
         }
+        return res.sendStatus(404);
+    } catch (error) {}
+};
+
+export const changeQuantity = async (req: Request, res: Response) => {
+    try {
+        const actionType = req.body.actionType;
+        const productIDInCart = req.body.productIDInCart;
+        const userCart = await Cart.findOne({ cartOwner: req.authenticatedUser._id });
+
+        if (userCart) {
+            const productIndexInCart = userCart?.items.findIndex(
+                (item) => item.productID === productIDInCart
+            );
+
+            if (productIndexInCart != -1) {
+                // if action is increase quantity
+                if (actionType === "+") userCart.items[productIndexInCart].quantity++;
+
+                // if actin is decrease quantity
+                if (actionType === "-") userCart.items[productIndexInCart].quantity--;
+            }
+
+            // save updated quantity of item in cart
+            await userCart.save();
+            return res.sendStatus(200);
+        }
+        return res.sendStatus(404);
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }
