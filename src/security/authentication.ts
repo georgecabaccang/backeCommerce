@@ -29,6 +29,8 @@ export const token = (user: IUserModelForTokensAndPayload) => {
 export const refreshTokenFn = (refreshToken: string, userEmail: string) => {
     if (REFRESH_TOKEN) {
         const userDetails = jwt.verify(refreshToken, REFRESH_TOKEN) as JwtPayload;
+
+        // Check if use matches provided token
         if (userDetails.email != userEmail) return "refresh token does not belong to current user";
         return token({ email: userDetails.email, _id: userDetails._id });
     }
@@ -37,11 +39,17 @@ export const refreshTokenFn = (refreshToken: string, userEmail: string) => {
 export const authToken = (req: Request, res: Response, next: NextFunction) => {
     try {
         const header = req.headers.authorization;
+        const email = req.body.email;
         const token = header && header.split(" ")[1];
+
         if (!token) return res.send("no token provided");
 
         if (ACCESS_TOKEN) {
             const userDetails = jwt.verify(token, ACCESS_TOKEN) as JwtPayload;
+
+            // Check if use matches provided token
+            if (email != userDetails.email) return res.send("Payload User Mismatch");
+
             req.authenticatedUser = { email: userDetails.email, _id: userDetails._id };
             next();
         }

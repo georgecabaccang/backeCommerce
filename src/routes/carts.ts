@@ -5,7 +5,7 @@ import { addToCart } from "../controllers/cartControllers";
 
 const cartsRoutes = express.Router();
 
-cartsRoutes.get("/", authToken, getUserCart);
+cartsRoutes.post("/", authToken, getUserCart);
 cartsRoutes.post("/add-to-cart", authToken, addToCart);
 
 export default cartsRoutes;
