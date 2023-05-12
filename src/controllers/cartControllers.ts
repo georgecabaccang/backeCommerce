@@ -29,21 +29,35 @@ export const addToCart = async (req: Request, res: Response) => {
 
         if (userCart) {
             if (product) {
-                // create object with product's properties
-                const addItemToCart: IItemModel = {
-                    productName: product.productName,
-                    price: product.price,
-                    image: product.image,
-                    stock: product.stock,
-                    discount: product.discount,
-                    productID: itemToCart.productID,
-                    quantity: itemToCart.quantity,
-                };
+                // Check if product is already in userCart
+                const productIndexInCart = userCart?.items.findIndex(
+                    (item) => item.productID === itemToCart.productID
+                );
 
-                // push item to user's cart items array
-                userCart?.items.push(addItemToCart);
+                // If product is already in cart
+                if (productIndexInCart != -1) {
+                    userCart.items[productIndexInCart].quantity += itemToCart.quantity;
+                }
+
+                // If product is not in cart
+                if (productIndexInCart == -1) {
+                    // create object with product's properties
+                    const addItemToCart: IItemModel = {
+                        productName: product.productName,
+                        price: product.price,
+                        image: product.image,
+                        stock: product.stock,
+                        discount: product.discount,
+                        productID: itemToCart.productID,
+                        quantity: itemToCart.quantity,
+                    };
+
+                    // push item to user's cart items array
+                    userCart?.items.push(addItemToCart);
+                }
+
                 await userCart.save();
-                
+
                 res.send(userCart);
             }
         }
