@@ -68,28 +68,28 @@ export const addToCart = async (req: Request, res: Response) => {
 
 export const changeQuantity = async (req: Request, res: Response) => {
     try {
-        const actionType = req.body.actionType;
-        const productIDInCart = req.body.productIDInCart;
+        const quantity = req.body.quantity;
+        const productID = req.body.productID;
         const userCart = await Cart.findOne({ cartOwner: req.authenticatedUser._id });
 
         if (userCart) {
             const productIndexInCart = userCart?.items.findIndex(
-                (item) => item.productID === productIDInCart
+                (item) => item.productID === productID
             );
 
+            const qweqe = { fromReq: productID, inCart: userCart.items };
+            // return res.send(req.body);
+
             if (productIndexInCart != -1) {
-                // if action is increase quantity
-                if (actionType === "+") userCart.items[productIndexInCart].quantity++;
+                userCart.items[productIndexInCart].quantity = quantity;
 
-                // if actin is decrease quantity
-                if (actionType === "-") userCart.items[productIndexInCart].quantity--;
+                // save updated quantity of item in cart
+                await userCart.save();
+                return res.sendStatus(200);
             }
-
-            // save updated quantity of item in cart
-            await userCart.save();
-            return res.sendStatus(200);
+            return res.sendStatus(404);
         }
-        return res.sendStatus(404);
+        if (!userCart) return res.sendStatus(404);
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }
