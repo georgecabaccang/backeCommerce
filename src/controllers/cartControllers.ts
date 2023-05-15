@@ -6,6 +6,7 @@ import { IItemModel } from "../types/ItemModel";
 import { JwtPayload } from "jsonwebtoken";
 import { IUserModelForTokensAndPayload } from "../types/UserModel";
 import Product from "../models/productModel";
+import CheckOut from "../models/checkOutModel";
 
 export const getUserCart = async (req: Request, res: Response) => {
     try {
@@ -90,6 +91,31 @@ export const changeQuantity = async (req: Request, res: Response) => {
             return res.sendStatus(404);
         }
         if (!userCart) return res.sendStatus(404);
+    } catch (error) {
+        if (error instanceof Error) return res.send(error.message);
+    }
+};
+
+export const addToCheckOut = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const itemsToCheckOut = req.body.itemsToCheckOut;
+
+        let totalAmountToPay: number = 0;
+        await itemsToCheckOut.forEach((itemToCheckOut: IItemModel) => {
+            if (itemToCheckOut.price && itemToCheckOut.quantity) {
+                const totalAmountPerItem = itemToCheckOut.price * itemToCheckOut.quantity;
+                totalAmountToPay += totalAmountPerItem;
+            }
+        });
+
+        const newCheckOut = new CheckOut({
+            items: itemsToCheckOut,
+            totalAmountToPay: totalAmountToPay,
+            cartOwner: user_id,
+        });
+        await newCheckOut.save();
+        res.send(newCheckOut);
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }
