@@ -1,6 +1,6 @@
 import { IProductModel } from "./ProductModel";
 
 export interface IItemModel extends IProductModel {
-    productID: string;
+    prod_id: string;
     quantity: number;
 }

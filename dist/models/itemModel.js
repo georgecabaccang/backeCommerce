@@ -8,7 +8,7 @@ const itemSchema = new mongoose_1.Schema({
     stock: { type: Number, required: true },
     image: { type: String, required: true },
     quantity: { type: Number, required: true },
-    productID: { type: String, required: true },
+    prod_id: { type: String, required: true },
 });
 const Item = (0, mongoose_1.model)("Item", itemSchema);
 exports.default = Item;

@@ -1,18 +1,14 @@
 import { Request, Response } from "express";
 import Cart from "../models/cartModel";
-import { ICartModel } from "../types/CartModel";
-import Item from "../models/itemModel";
 import { IItemModel } from "../types/ItemModel";
-import { JwtPayload } from "jsonwebtoken";
-import { IUserModelForTokensAndPayload } from "../types/UserModel";
 import Product from "../models/productModel";
 import CheckOut from "../models/checkOutModel";
 
 export const getUserCart = async (req: Request, res: Response) => {
     try {
-        const user: IUserModelForTokensAndPayload = req.authenticatedUser as JwtPayload;
-        if (user._id) {
-            const cartOfUser = await Cart.findOne({ cartOwner: user._id });
+        const user_id = req.authenticatedUser._id;
+        if (user_id) {
+            const cartOfUser = await Cart.findOne({ cartOwner: user_id });
             return res.send(cartOfUser?.items);
         }
         return res.sendStatus(404);
@@ -23,18 +19,20 @@ export const getUserCart = async (req: Request, res: Response) => {
 
 export const addToCart = async (req: Request, res: Response) => {
     try {
+        const user_id = req.authenticatedUser._id;
         const itemToCart: IItemModel = req.body;
         // Find product in database
-        const product = await Product.findOne<IItemModel>({ _id: itemToCart.productID });
+        const product = await Product.findOne<IItemModel>({ _id: itemToCart.prod_id });
+
         // Get user's cart
-        const userCart = await Cart.findOne({ cartOwner: req.authenticatedUser._id });
+        const userCart = await Cart.findOne({ cartOwner: user_id });
 
         if (userCart) {
             if (product) {
                 // Check if product is already in userCart
-                const productIndexInCart = userCart?.items.findIndex(
-                    (item) => item.productID === itemToCart.productID
-                );
+                const productIndexInCart = userCart?.items.findIndex((item) => {
+                    return item.prod_id === itemToCart.prod_id;
+                });
 
                 // If product is already in cart
                 if (productIndexInCart != -1) {
@@ -50,7 +48,7 @@ export const addToCart = async (req: Request, res: Response) => {
                         image: product.image,
                         stock: product.stock,
                         discount: product.discount,
-                        productID: itemToCart.productID,
+                        prod_id: itemToCart.prod_id,
                         quantity: itemToCart.quantity,
                     };
 
@@ -69,17 +67,15 @@ export const addToCart = async (req: Request, res: Response) => {
 
 export const changeQuantity = async (req: Request, res: Response) => {
     try {
+        const user_id = req.authenticatedUser._id;
         const quantity = req.body.quantity;
-        const productID = req.body.productID;
-        const userCart = await Cart.findOne({ cartOwner: req.authenticatedUser._id });
+        const prod_id = req.body.prod_id;
+        const userCart = await Cart.findOne({ cartOwner: user_id });
 
         if (userCart) {
-            const productIndexInCart = userCart?.items.findIndex(
-                (item) => item.productID === productID
-            );
-
-            const qweqe = { fromReq: productID, inCart: userCart.items };
-            // return res.send(req.body);
+            const productIndexInCart = userCart?.items.findIndex((item) => {
+                return item.prod_id === prod_id;
+            });
 
             if (productIndexInCart != -1) {
                 userCart.items[productIndexInCart].quantity = quantity;
@@ -99,23 +95,52 @@ export const changeQuantity = async (req: Request, res: Response) => {
 export const addToCheckOut = async (req: Request, res: Response) => {
     try {
         const user_id = req.authenticatedUser._id;
-        const itemsToCheckOut = req.body.itemsToCheckOut;
+        const itemToCheckOut = req.body.itemToCheckOut;
 
-        let totalAmountToPay: number = 0;
-        await itemsToCheckOut.forEach((itemToCheckOut: IItemModel) => {
-            if (itemToCheckOut.price && itemToCheckOut.quantity) {
-                const totalAmountPerItem = itemToCheckOut.price * itemToCheckOut.quantity;
-                totalAmountToPay += totalAmountPerItem;
+        const userCart = await Cart.findOne({ cartOwner: user_id });
+        const checkOutInstance = await CheckOut.findOne({
+            cart_id: userCart?._id,
+        });
+
+        if (!checkOutInstance) {
+            const newCheckOut = new CheckOut({
+                items: [itemToCheckOut],
+                totalAmountToPay: itemToCheckOut.price * itemToCheckOut.quantity,
+                cart_id: userCart?._id,
+            });
+            await newCheckOut.save();
+            return res.sendStatus(200);
+        }
+
+        if (checkOutInstance) {
+            const indexOfItemInCheckOutInstance = checkOutInstance.items.findIndex((item) => {
+                return item.prod_id === itemToCheckOut.prod_id;
+            });
+
+            if (indexOfItemInCheckOutInstance != -1) {
+                return res.send("already in checkout");
             }
-        });
 
-        const newCheckOut = new CheckOut({
-            items: itemsToCheckOut,
-            totalAmountToPay: totalAmountToPay,
-            cartOwner: user_id,
-        });
-        await newCheckOut.save();
-        res.send(newCheckOut);
+            checkOutInstance.items.push(itemToCheckOut);
+            checkOutInstance.totalAmountToPay += itemToCheckOut.price * itemToCheckOut.quantity;
+            await checkOutInstance.save();
+            return res.sendStatus(200);
+        }
+    } catch (error) {
+        if (error instanceof Error) return res.send(error.message);
+    }
+};
+
+export const getToCheckOutItems = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const userCart = await Cart.findOne({ cartOwner: user_id });
+
+        const toCheckOutItems = await CheckOut.findOne({ cart_id: userCart?._id });
+        if (toCheckOutItems) {
+            return res.send(toCheckOutItems);
+        }
+        return res.send("no items to check out found");
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }

@@ -6,9 +6,9 @@ const itemSchema = new Schema<IItemModel, Model<IItemModel>>({
     price: { type: Number, required: true },
     discount: { type: Number, required: true },
     stock: { type: Number, required: true },
-    image: { type: String, required: true },
+    image: { type: String },
     quantity: { type: Number, required: true },
-    productID: { type: String, required: true },
+    prod_id: { type: String, required: true },
 });
 
 const Item = model<IItemModel>("Item", itemSchema);

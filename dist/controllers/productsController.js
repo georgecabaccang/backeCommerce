@@ -50,8 +50,8 @@ const addProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.addProducts = addProducts;
 const getProductDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const productId = req.params._id;
-        const product = yield productModel_1.default.findById(productId);
+        const prod_id = req.params._id;
+        const product = yield productModel_1.default.findById(prod_id);
         res.send(product);
     }
     catch (error) {

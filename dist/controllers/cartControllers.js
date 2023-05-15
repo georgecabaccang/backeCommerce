@@ -33,7 +33,7 @@ const addToCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const itemToCart = req.body;
         // Find product in database
-        const product = yield productModel_1.default.findOne({ _id: itemToCart.productID });
+        const product = yield productModel_1.default.findOne({ _id: itemToCart.prod_id });
         // Get user's cart
         const userCart = yield cartModel_1.default.findOne({ cartOwner: req.authenticatedUser._id });
         if (userCart) {
@@ -45,7 +45,7 @@ const addToCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     image: product.image,
                     stock: product.stock,
                     discount: product.discount,
-                    productID: itemToCart.productID,
+                    prod_id: itemToCart.prod_id,
                     quantity: itemToCart.quantity,
                 };
                 // push item to user's cart items array
