@@ -118,11 +118,30 @@ export const addToCheckOut = async (req: Request, res: Response) => {
             });
 
             if (indexOfItemInCheckOutInstance != -1) {
-                return res.send("already in checkout");
+                checkOutInstance.items[indexOfItemInCheckOutInstance].quantity =
+                    itemToCheckOut.quantity;
+
+                await checkOutInstance.save();
+
+                const checkOutInstanceTwo = await CheckOut.findOne({
+                    cart_id: userCart?._id,
+                });
+
+                if (checkOutInstanceTwo) {
+                    let newTotalAmountToPay: number = 0;
+                    checkOutInstanceTwo.items.forEach((item) => {
+                        if (item.price && item.quantity)
+                            newTotalAmountToPay += item.price * item.quantity;
+                    });
+                    checkOutInstance.totalAmountToPay = newTotalAmountToPay;
+                }
             }
 
-            checkOutInstance.items.push(itemToCheckOut);
-            checkOutInstance.totalAmountToPay += itemToCheckOut.price * itemToCheckOut.quantity;
+            if (indexOfItemInCheckOutInstance == -1) {
+                checkOutInstance.items.push(itemToCheckOut);
+                checkOutInstance.totalAmountToPay += itemToCheckOut.price * itemToCheckOut.quantity;
+            }
+
             await checkOutInstance.save();
             return res.sendStatus(200);
         }
