@@ -53,7 +53,7 @@ export const addToCart = async (req: Request, res: Response) => {
                     };
 
                     // push item to user's cart items array
-                    userCart?.items.push(addItemToCart);
+                    userCart.items.push(addItemToCart);
                 }
 
                 // save updated cart
@@ -62,7 +62,39 @@ export const addToCart = async (req: Request, res: Response) => {
             }
         }
         return res.sendStatus(404);
-    } catch (error) {}
+    } catch (error) {
+        if (error instanceof Error) return res.send(error.message);
+    }
+};
+
+export const removeFromCart = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const prod_id = req.body.prod_id;
+        const userCart = await Cart.findOne({ cartOwner: user_id });
+
+        if (userCart) {
+            const indexOfItemInCart = userCart.items.findIndex((item) => {
+                return item.prod_id === prod_id;
+            });
+
+            if (indexOfItemInCart != 1) {
+                if (userCart.items[indexOfItemInCart].quantity != 1) {
+                    userCart.items[indexOfItemInCart].quantity--;
+                }
+                if (userCart.items[indexOfItemInCart].quantity == 1) {
+                    userCart.items.splice(indexOfItemInCart, 1);
+                }
+
+                await userCart.save();
+                return res.sendStatus(200);
+            }
+            return res.sendStatus(404);
+        }
+        return res.sendStatus(404);
+    } catch (error) {
+        if (error instanceof Error) return res.send(error.message);
+    }
 };
 
 export const changeQuantity = async (req: Request, res: Response) => {
@@ -86,7 +118,7 @@ export const changeQuantity = async (req: Request, res: Response) => {
             }
             return res.sendStatus(404);
         }
-        if (!userCart) return res.sendStatus(404);
+        return res.sendStatus(404);
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }
@@ -121,6 +153,7 @@ export const addToCheckOut = async (req: Request, res: Response) => {
                 checkOutInstance.items[indexOfItemInCheckOutInstance].quantity =
                     itemToCheckOut.quantity;
 
+                // !!!!!!!!!!!!!!!!!! CHECK IF STILL NEED SECOND INSTANCE
                 await checkOutInstance.save();
 
                 const checkOutInstanceTwo = await CheckOut.findOne({

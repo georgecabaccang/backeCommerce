@@ -8,7 +8,7 @@ const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
 export const token = (user: IUserModelForTokensAndPayload) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
-        const accessToken = jwt.sign(user, ACCESS_TOKEN, { expiresIn: "10m" }); // change expiresIn accordingly if testing
+        const accessToken = jwt.sign(user, ACCESS_TOKEN, { expiresIn: "10000m" }); // change expiresIn accordingly if testing
         const refreshToken = jwt.sign({ email: user.email, _id: user._id }, REFRESH_TOKEN, {
             expiresIn: "15m",
         });
