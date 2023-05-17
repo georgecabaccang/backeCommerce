@@ -44,6 +44,7 @@ export const addToCart = async (req: Request, res: Response) => {
                     // create object with product's properties
                     const addItemToCart: IItemModel = {
                         productName: product.productName,
+                        description: product.description,
                         price: product.price,
                         image: product.image,
                         stock: product.stock,
@@ -183,11 +184,38 @@ export const addToCheckOut = async (req: Request, res: Response) => {
     }
 };
 
+export const removeFromCheckOut = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const itemToRemove = req.body.itemToRemove;
+
+        const userCart = await Cart.findOne({ cartOwner: user_id });
+        const checkOutInstance = await CheckOut.findOne({ cart_id: userCart?._id });
+        if (checkOutInstance) {
+            const indexOfItemInCheckOutInstance = checkOutInstance.items.findIndex((item) => {
+                return item.prod_id === itemToRemove;
+            });
+
+            if (indexOfItemInCheckOutInstance != -1) {
+                checkOutInstance.totalAmountToPay -=
+                    checkOutInstance.items[indexOfItemInCheckOutInstance].price *
+                    checkOutInstance.items[indexOfItemInCheckOutInstance].quantity;
+
+                checkOutInstance.items.splice(indexOfItemInCheckOutInstance, 1);
+                await checkOutInstance.save();
+                return res.sendStatus(200);
+            }
+        }
+        return res.sendStatus(404);
+    } catch (error) {
+        if (error instanceof Error) return res.send(error.message);
+    }
+};
+
 export const getToCheckOutItems = async (req: Request, res: Response) => {
     try {
         const user_id = req.authenticatedUser._id;
         const userCart = await Cart.findOne({ cartOwner: user_id });
-
         const toCheckOutItems = await CheckOut.findOne({ cart_id: userCart?._id });
         if (toCheckOutItems) {
             return res.send(toCheckOutItems);
