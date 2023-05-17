@@ -206,7 +206,6 @@ export const removeFromCheckOut = async (req: Request, res: Response) => {
                 return res.sendStatus(200);
             }
         }
-        return res.sendStatus(404);
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }

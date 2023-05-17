@@ -132,10 +132,7 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.body.refreshToken;
         const deleted = yield refreshTokenModel_1.default.deleteOne({ refreshToken: refreshToken });
-        if (deleted.deletedCount === 0) {
-            return res.send(deleted.deletedCount);
-        }
-        res.send(deleted.deletedCount);
+        res.send(deleted);
     }
     catch (error) {
         if (error instanceof Error) {

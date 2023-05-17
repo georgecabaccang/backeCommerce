@@ -10,7 +10,7 @@ const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 const token = (user) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
-        const accessToken = jsonwebtoken_1.default.sign(user, ACCESS_TOKEN, { expiresIn: "10m" }); // change expiresIn accordingly if testing
+        const accessToken = jsonwebtoken_1.default.sign(user, ACCESS_TOKEN, { expiresIn: "10000m" }); // change expiresIn accordingly if testing
         const refreshToken = jsonwebtoken_1.default.sign({ email: user.email, _id: user._id }, REFRESH_TOKEN, {
             expiresIn: "15m",
         });
@@ -32,6 +32,7 @@ exports.token = token;
 const refreshTokenFn = (refreshToken, userEmail) => {
     if (REFRESH_TOKEN) {
         const userDetails = jsonwebtoken_1.default.verify(refreshToken, REFRESH_TOKEN);
+        // Check if use matches provided token
         if (userDetails.email != userEmail)
             return "refresh token does not belong to current user";
         return (0, exports.token)({ email: userDetails.email, _id: userDetails._id });
@@ -41,11 +42,15 @@ exports.refreshTokenFn = refreshTokenFn;
 const authToken = (req, res, next) => {
     try {
         const header = req.headers.authorization;
+        const email = req.body.email;
         const token = header && header.split(" ")[1];
         if (!token)
             return res.send("no token provided");
         if (ACCESS_TOKEN) {
             const userDetails = jsonwebtoken_1.default.verify(token, ACCESS_TOKEN);
+            // Check if use matches provided token
+            if (email != userDetails.email)
+                return res.send("Payload User Mismatch");
             req.authenticatedUser = { email: userDetails.email, _id: userDetails._id };
             next();
         }
