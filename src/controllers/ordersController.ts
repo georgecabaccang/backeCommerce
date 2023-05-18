@@ -1,21 +1,18 @@
 import { Request, Response } from "express";
 import Cart from "../models/cartModel";
 import CheckOut from "../models/checkOutModel";
-import Order from "../models/orderModel";
+import OrderList from "../models/orderListModel";
 
 export const placeOrder = async (req: Request, res: Response) => {
     try {
         const user_id = req.authenticatedUser._id;
         const userCart = await Cart.findOne({ cartOwner: user_id });
         const checkOutInstance = await CheckOut.findOne({ cart_id: userCart?._id });
+        const userOrders = await OrderList.findOne({ ordersOwner: user_id });
 
-        if (checkOutInstance) {
-            const placedOrder = new Order({
-                itemsOrdered: checkOutInstance.items,
-                totalAmountToPay: checkOutInstance.totalAmountToPay,
-                orderedBy: user_id,
-            });
-            await placedOrder.save();
+        if (checkOutInstance && userOrders) {
+            userOrders.orders.push(checkOutInstance);
+            await userOrders.save();
             return res.sendStatus(200);
         }
     } catch (error) {
@@ -23,22 +20,11 @@ export const placeOrder = async (req: Request, res: Response) => {
     }
 };
 
-export const getOrders = async (req: Request, res: Response) => {
-    try {
-        const user_id = req.authenticatedUser._id;
-        const userCart = await Cart.findOne({ cartOwner: user_id });
-        const checkOutInstance = await CheckOut.findOne({ cart_id: userCart?._id });
-
-        if (checkOutInstance) {
-            const placedOrder = new Order({
-                itemsOrdered: checkOutInstance.items,
-                totalAmountToPay: checkOutInstance.totalAmountToPay,
-                orderedBy: user_id,
-            });
-            await placedOrder.save();
-            return res.sendStatus(200);
-        }
-    } catch (error) {
-        if (error instanceof Error) return res.send(error.message);
-    }
-};
+// export const getOrders = async (req: Request, res: Response) => {
+//     try {
+//         const user_id = req.authenticatedUser._id;
+//         const orders = await Order.find();
+//     } catch (error) {
+//         if (error instanceof Error) return res.send(error.message);
+//     }
+// };

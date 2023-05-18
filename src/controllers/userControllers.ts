@@ -1,22 +1,43 @@
 import { Request, Response } from "express";
+
+import RefreshToken from "../models/refreshTokenModel";
 import bcrypt from "bcrypt";
 import User from "../models/userModel";
 import Cart from "../models/cartModel";
+import OrderList from "../models/orderListModel";
+import PurchaseList from "../models/purchaseListModel";
+
 import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
 import { refreshTokenFn, token } from "../security/authentication";
-import RefreshToken from "../models/refreshTokenModel";
+import { IOrderList } from "../types/OrderListModel";
+import { IPurchasesList } from "../types/PurchaseListModel";
 
 // Create User
 export const createUser = async (req: Request, res: Response) => {
     try {
-        // Create New Cart
         const userDetails = req.body;
+
+        // Create New Cart
         const newCart = new Cart<ICartModel>({
             items: [],
             cartOwner: null,
         });
         const newUserCart = await newCart.save();
+
+        // Creat new Orders
+        const newOrders = new OrderList<IOrderList>({
+            orders: [],
+            ordersOwner: null,
+        });
+        const newUserOrders = await newOrders.save();
+
+        // Creat new Purchases
+        const newPurchases = new PurchaseList<IPurchasesList>({
+            purchases: [],
+            purchasesOwner: null,
+        });
+        const newUserPurchases = await newPurchases.save();
 
         // Create new User
         const hashedPassword = await bcrypt.hash(userDetails.password, 10);
@@ -24,13 +45,24 @@ export const createUser = async (req: Request, res: Response) => {
             email: userDetails.email,
             password: hashedPassword,
             userCart: null,
+            userOrders: null,
+            userPurchases: null,
         });
         const newRegisteredUser = await newUser.save();
 
         // Assign User ObjectId to newly created Cart and vice versa
         newUserCart.cartOwner = newRegisteredUser._id;
         await newUserCart.save();
+
+        newUserOrders.ordersOwner = newRegisteredUser._id;
+        await newUserOrders.save();
+
+        newUserPurchases.purchasesOwner = newRegisteredUser._id;
+        await newUserPurchases.save();
+
         newRegisteredUser.userCart = newUserCart._id;
+        newRegisteredUser.userOrders = newUserOrders._id;
+        newRegisteredUser.userPurchases = newUserPurchases._id;
         await newRegisteredUser.save();
 
         res.send("user created");
