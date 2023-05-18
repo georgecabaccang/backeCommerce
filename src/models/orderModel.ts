@@ -1,15 +1,14 @@
 import { Schema, Types, model } from "mongoose";
 
-const orderSchema = new Schema(
+const ordersSchema = new Schema(
     {
-        itemsOrdered: [],
-        totalAmountToPay: { type: Number, required: true },
-        orderedBy: { type: Types.ObjectId, ref: "User" },
+        orders: [],
+        ordersOwner: { type: Types.ObjectId, ref: "User" },
     },
     {
         timestamps: true,
     }
 );
 
-const Order = model("Order", orderSchema);
-export default Order;
+const Orders = model("Order", ordersSchema);
+export default Orders;

@@ -5,6 +5,8 @@ export interface IUserModel {
     email: string;
     password: string;
     userCart?: Types.ObjectId | null;
+    userOrders?: Types.ObjectId | null;
+    userPurchases?: Types.ObjectId | null;
 }
 
 export interface IUserModelForTokensAndPayload extends JwtPayload {
