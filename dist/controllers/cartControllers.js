@@ -204,6 +204,7 @@ const removeFromCheckOut = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 return res.sendStatus(200);
             }
         }
+        return res.send("no items to check out found");
     }
     catch (error) {
         if (error instanceof Error)

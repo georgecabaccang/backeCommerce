@@ -11,7 +11,7 @@ const checkOutModel = new mongoose_1.Schema({
     cart_id: { type: mongoose_1.Types.ObjectId, ref: "Cart" },
     expireAt: {
         type: Date,
-        expires: 2,
+        expires: 86400,
         default: Date.now,
     },
 });

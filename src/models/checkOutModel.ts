@@ -8,7 +8,7 @@ const checkOutModel = new Schema<ICheckOutModel>({
     cart_id: { type: Types.ObjectId, ref: "Cart" },
     expireAt: {
         type: Date,
-        expires: 2,
+        expires: 86400,
         default: Date.now,
     },
 });

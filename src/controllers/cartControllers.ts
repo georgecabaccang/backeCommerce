@@ -206,6 +206,7 @@ export const removeFromCheckOut = async (req: Request, res: Response) => {
                 return res.sendStatus(200);
             }
         }
+        return res.send("no items to check out found");
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }

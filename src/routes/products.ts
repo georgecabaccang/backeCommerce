@@ -12,7 +12,4 @@ productRoutes.get("/", getProducts);
 productRoutes.get("/product/:_id", getProductDetails);
 productRoutes.post("/add-product", addProducts);
 
-// FOR CREATING TEMP CART
-productRoutes.post("/cart", createCart);
-
 export default productRoutes;
