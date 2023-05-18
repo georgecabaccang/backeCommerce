@@ -13,33 +13,55 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.refreshLogin = exports.login = exports.createUser = void 0;
+const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
+const orderListModel_1 = __importDefault(require("../models/orderListModel"));
+const purchaseListModel_1 = __importDefault(require("../models/purchaseListModel"));
 const authentication_1 = require("../security/authentication");
-const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
 // Create User
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Create New Cart
         const userDetails = req.body;
+        // Create New Cart
         const newCart = new cartModel_1.default({
             items: [],
             cartOwner: null,
         });
         const newUserCart = yield newCart.save();
+        // Creat new Orders
+        const newOrders = new orderListModel_1.default({
+            orders: [],
+            ordersOwner: null,
+        });
+        const newUserOrders = yield newOrders.save();
+        // Creat new Purchases
+        const newPurchases = new purchaseListModel_1.default({
+            purchases: [],
+            purchasesOwner: null,
+        });
+        const newUserPurchases = yield newPurchases.save();
         // Create new User
         const hashedPassword = yield bcrypt_1.default.hash(userDetails.password, 10);
         const newUser = new userModel_1.default({
             email: userDetails.email,
             password: hashedPassword,
             userCart: null,
+            userOrders: null,
+            userPurchases: null,
         });
         const newRegisteredUser = yield newUser.save();
         // Assign User ObjectId to newly created Cart and vice versa
         newUserCart.cartOwner = newRegisteredUser._id;
         yield newUserCart.save();
+        newUserOrders.ordersOwner = newRegisteredUser._id;
+        yield newUserOrders.save();
+        newUserPurchases.purchasesOwner = newRegisteredUser._id;
+        yield newUserPurchases.save();
         newRegisteredUser.userCart = newUserCart._id;
+        newRegisteredUser.userOrders = newUserOrders._id;
+        newRegisteredUser.userPurchases = newUserPurchases._id;
         yield newRegisteredUser.save();
         res.send("user created");
     }

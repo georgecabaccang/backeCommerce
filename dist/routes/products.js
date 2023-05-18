@@ -9,6 +9,4 @@ const productsController_1 = require("../controllers/productsController");
 productRoutes.get("/", productsController_1.getProducts);
 productRoutes.get("/product/:_id", productsController_1.getProductDetails);
 productRoutes.post("/add-product", productsController_1.addProducts);
-// FOR CREATING TEMP CART
-productRoutes.post("/cart", productsController_1.createCart);
 exports.default = productRoutes;

@@ -4,7 +4,12 @@ import { IOrderList } from "../types/OrderListModel";
 
 const orderListSchema = new Schema<IOrderList>(
     {
-        orders: [Item.schema],
+        orders: [
+            {
+                items: [{ prod_id: String, productName: String, quantity: Number, price: Number }],
+                totalAmount: Number,
+            },
+        ],
         ordersOwner: { type: Types.ObjectId, ref: "User" },
     },
     { timestamps: true }

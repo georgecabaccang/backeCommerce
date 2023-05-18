@@ -11,7 +11,13 @@ export const placeOrder = async (req: Request, res: Response) => {
         const userOrders = await OrderList.findOne({ ordersOwner: user_id });
 
         if (checkOutInstance && userOrders) {
-            userOrders.orders.push(checkOutInstance);
+            const toBePushed = {
+                items: checkOutInstance.items,
+                totalAmount: checkOutInstance.totalAmountToPay,
+            };
+
+            // res.send(toBePushed);
+            userOrders.orders.push(toBePushed);
             await userOrders.save();
             return res.sendStatus(200);
         }
