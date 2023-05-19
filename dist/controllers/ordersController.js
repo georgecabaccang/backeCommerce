@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.placeOrder = void 0;
+exports.getOrders = exports.placeOrder = void 0;
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const checkOutModel_1 = __importDefault(require("../models/checkOutModel"));
 const orderListModel_1 = __importDefault(require("../models/orderListModel"));
@@ -25,8 +25,9 @@ const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (checkOutInstance && userOrders) {
             const toBePushed = {
                 items: checkOutInstance.items,
-                totalAmountToPay: checkOutInstance.totalAmountToPay,
+                totalAmount: checkOutInstance.totalAmountToPay,
             };
+            // res.send(toBePushed);
             userOrders.orders.push(toBePushed);
             yield userOrders.save();
             return res.sendStatus(200);
@@ -38,11 +39,15 @@ const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.placeOrder = placeOrder;
-// export const getOrders = async (req: Request, res: Response) => {
-//     try {
-//         const user_id = req.authenticatedUser._id;
-//         const orders = await Order.find();
-//     } catch (error) {
-//         if (error instanceof Error) return res.send(error.message);
-//     }
-// };
+const getOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const orders = yield orderListModel_1.default.find({ ordersOwner: user_id });
+        return res.send(orders);
+    }
+    catch (error) {
+        if (error instanceof Error)
+            return res.send(error.message);
+    }
+});
+exports.getOrders = getOrders;

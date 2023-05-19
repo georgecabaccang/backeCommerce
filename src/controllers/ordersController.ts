@@ -26,11 +26,12 @@ export const placeOrder = async (req: Request, res: Response) => {
     }
 };
 
-// export const getOrders = async (req: Request, res: Response) => {
-//     try {
-//         const user_id = req.authenticatedUser._id;
-//         const orders = await Order.find();
-//     } catch (error) {
-//         if (error instanceof Error) return res.send(error.message);
-//     }
-// };
+export const getOrders = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const orders = await OrderList.find({ ordersOwner: user_id });
+        return res.send(orders);
+    } catch (error) {
+        if (error instanceof Error) return res.send(error.message);
+    }
+};
