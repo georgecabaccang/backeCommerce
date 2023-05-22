@@ -1,15 +1,10 @@
 import { Schema, Types, model } from "mongoose";
-import Item from "./itemModel";
 import { IOrderList } from "../types/OrderListModel";
+import Order from "./orderModel";
 
 const orderListSchema = new Schema<IOrderList>(
     {
-        orders: [
-            {
-                items: [{ prod_id: String, productName: String, quantity: Number, price: Number }],
-                totalAmount: Number,
-            },
-        ],
+        orders: [Order.schema],
         ordersOwner: { type: Types.ObjectId, ref: "User" },
     },
     { timestamps: true }

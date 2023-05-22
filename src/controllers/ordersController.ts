@@ -16,7 +16,6 @@ export const placeOrder = async (req: Request, res: Response) => {
                 totalAmount: checkOutInstance.totalAmountToPay,
             };
 
-            // res.send(toBePushed);
             userOrders.orders.push(toBePushed);
             await userOrders.save();
             return res.sendStatus(200);
@@ -29,7 +28,7 @@ export const placeOrder = async (req: Request, res: Response) => {
 export const getOrders = async (req: Request, res: Response) => {
     try {
         const user_id = req.authenticatedUser._id;
-        const orders = await OrderList.find({ ordersOwner: user_id });
+        const orders = await OrderList.findOne({ ordersOwner: user_id });
         return res.send(orders);
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);

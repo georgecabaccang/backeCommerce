@@ -27,7 +27,6 @@ const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 items: checkOutInstance.items,
                 totalAmount: checkOutInstance.totalAmountToPay,
             };
-            // res.send(toBePushed);
             userOrders.orders.push(toBePushed);
             yield userOrders.save();
             return res.sendStatus(200);
@@ -42,7 +41,7 @@ exports.placeOrder = placeOrder;
 const getOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user_id = req.authenticatedUser._id;
-        const orders = yield orderListModel_1.default.find({ ordersOwner: user_id });
+        const orders = yield orderListModel_1.default.findOne({ ordersOwner: user_id });
         return res.send(orders);
     }
     catch (error) {

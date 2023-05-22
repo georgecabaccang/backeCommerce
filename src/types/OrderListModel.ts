@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-interface IOrder {
+export interface IOrder {
     items: Array<{ prod_id: string; productName: string; quantity: number; price: number }>;
     totalAmount: number;
 }
