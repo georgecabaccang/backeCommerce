@@ -16,6 +16,7 @@ export const placeOrder = async (req: Request, res: Response) => {
                 totalAmount: checkOutInstance.totalAmountToPay,
             };
 
+            // res.send(toBePushed);
             userOrders.orders.push(toBePushed);
             await userOrders.save();
             return res.sendStatus(200);
