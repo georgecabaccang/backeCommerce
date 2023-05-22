@@ -3,6 +3,8 @@ import { Types } from "mongoose";
 export interface IOrder {
     items: Array<{ prod_id: string; productName: string; quantity: number; price: number }>;
     totalAmount: number;
+    status?: string;
+    _id?: string;
 }
 
 export interface IOrderList {

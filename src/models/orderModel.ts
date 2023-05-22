@@ -5,6 +5,7 @@ const orderSchema = new Schema<IOrder>(
     {
         items: [{ prod_id: String, productName: String, quantity: Number, price: Number }],
         totalAmount: { type: Number, required: true },
+        status: { type: String, default: "pending" },
     },
     { timestamps: true }
 );

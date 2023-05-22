@@ -35,3 +35,25 @@ export const getOrders = async (req: Request, res: Response) => {
         if (error instanceof Error) return res.send(error.message);
     }
 };
+
+export const cancelOrder = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const orders = await OrderList.findOne({ ordersOwner: user_id });
+        if (orders) {
+            const indexOfOrder = orders.orders.findIndex((order) => {
+                return order._id == req.body.order_id;
+            });
+
+            if (indexOfOrder != -1) {
+                orders.orders.splice(indexOfOrder, 1);
+                await orders.save();
+                return res.sendStatus(200);
+            }
+            return res.sendStatus(404);
+        }
+        return res.sendStatus(404);
+    } catch (error) {
+        if (error instanceof Error) return res.send(error.message);
+    }
+};
