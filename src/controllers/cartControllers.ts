@@ -9,7 +9,7 @@ export const getUserCart = async (req: Request, res: Response) => {
         const user_id = req.authenticatedUser._id;
         if (user_id) {
             const cartOfUser = await Cart.findOne({ cartOwner: user_id });
-            return res.send(cartOfUser?.items);
+            return res.send(cartOfUser);
         }
         return res.sendStatus(404);
     } catch (error) {

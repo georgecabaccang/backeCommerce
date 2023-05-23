@@ -1,9 +1,20 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import Cart from "../models/cartModel";
 import CheckOut from "../models/checkOutModel";
 import OrderList from "../models/orderListModel";
 
-export const placeOrder = async (req: Request, res: Response) => {
+export const removeCheckOutDocument = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const userCart = await Cart.findOne({ cartOwner: user_id });
+        await CheckOut.deleteOne({ cart_id: userCart?._id });
+        return res.sendStatus(200);
+    } catch (error) {
+        if (error instanceof Error) return res.send(error.message);
+    }
+};
+
+export const placeOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user_id = req.authenticatedUser._id;
         const userCart = await Cart.findOne({ cartOwner: user_id });
@@ -19,7 +30,7 @@ export const placeOrder = async (req: Request, res: Response) => {
             // res.send(toBePushed);
             userOrders.orders.push(toBePushed);
             await userOrders.save();
-            return res.sendStatus(200);
+            next();
         }
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
