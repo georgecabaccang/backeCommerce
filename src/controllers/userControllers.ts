@@ -11,7 +11,7 @@ import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
 import { refreshTokenFn, token } from "../security/authentication";
 import { IOrderList } from "../types/OrderListModel";
-import { IPurchasesList } from "../types/PurchaseListModel";
+// import { IPurchasesList } from "../types/PurchaseListModel";
 
 // Create User
 export const createUser = async (req: Request, res: Response) => {
@@ -35,12 +35,12 @@ export const createUser = async (req: Request, res: Response) => {
         });
         const newUserOrders = await newOrders.save();
 
-        // Creat new Purchases
-        const newPurchases = new PurchaseList<IPurchasesList>({
-            purchases: [],
-            purchasesOwner: null,
-        });
-        const newUserPurchases = await newPurchases.save();
+        // // Creat new Purchases
+        // const newPurchases = new PurchaseList<IPurchasesList>({
+        //     purchases: [],
+        //     purchasesOwner: null,
+        // });
+        // const newUserPurchases = await newPurchases.save();
 
         // Create new User
         const hashedPassword = await bcrypt.hash(userDetails.password, 10);
@@ -60,12 +60,12 @@ export const createUser = async (req: Request, res: Response) => {
         newUserOrders.ordersOwner = newRegisteredUser._id;
         await newUserOrders.save();
 
-        newUserPurchases.purchasesOwner = newRegisteredUser._id;
-        await newUserPurchases.save();
+        // newUserPurchases.purchasesOwner = newRegisteredUser._id;
+        // await newUserPurchases.save();
 
         newRegisteredUser.userCart = newUserCart._id;
         newRegisteredUser.userOrders = newUserOrders._id;
-        newRegisteredUser.userPurchases = newUserPurchases._id;
+        // newRegisteredUser.userPurchases = newUserPurchases._id;
         await newRegisteredUser.save();
 
         res.send("user created");
