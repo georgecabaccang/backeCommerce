@@ -26,7 +26,6 @@ export const placeOrder = async (req: Request, res: Response) => {
                 if (indexOfItemInCart != -1) {
                     userCart.items.splice(indexOfItemInCart, 1);
                 } else {
-                    res.sendStatus(404);
                     break;
                 }
             }
