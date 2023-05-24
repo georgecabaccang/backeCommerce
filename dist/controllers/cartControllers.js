@@ -12,16 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getToCheckOutItems = exports.removeFromCheckOut = exports.addToCheckOut = exports.changeQuantity = exports.removeFromCart = exports.addToCart = exports.getUserCart = void 0;
+exports.changeQuantity = exports.removeFromCart = exports.addToCart = exports.getUserCart = void 0;
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const productModel_1 = __importDefault(require("../models/productModel"));
-const checkOutModel_1 = __importDefault(require("../models/checkOutModel"));
 const getUserCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user_id = req.authenticatedUser._id;
         if (user_id) {
             const cartOfUser = yield cartModel_1.default.findOne({ cartOwner: user_id });
-            return res.send(cartOfUser === null || cartOfUser === void 0 ? void 0 : cartOfUser.items);
+            return res.send(cartOfUser);
         }
         return res.sendStatus(404);
     }
@@ -133,98 +132,3 @@ const changeQuantity = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.changeQuantity = changeQuantity;
-const addToCheckOut = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user_id = req.authenticatedUser._id;
-        const itemToCheckOut = req.body.itemToCheckOut;
-        const userCart = yield cartModel_1.default.findOne({ cartOwner: user_id });
-        const checkOutInstance = yield checkOutModel_1.default.findOne({
-            cart_id: userCart === null || userCart === void 0 ? void 0 : userCart._id,
-        });
-        if (!checkOutInstance) {
-            const newCheckOut = new checkOutModel_1.default({
-                items: [itemToCheckOut],
-                totalAmountToPay: itemToCheckOut.price * itemToCheckOut.quantity,
-                cart_id: userCart === null || userCart === void 0 ? void 0 : userCart._id,
-            });
-            yield newCheckOut.save();
-            return res.sendStatus(200);
-        }
-        if (checkOutInstance) {
-            const indexOfItemInCheckOutInstance = checkOutInstance.items.findIndex((item) => {
-                return item.prod_id === itemToCheckOut.prod_id;
-            });
-            if (indexOfItemInCheckOutInstance != -1) {
-                checkOutInstance.items[indexOfItemInCheckOutInstance].quantity =
-                    itemToCheckOut.quantity;
-                // !!!!!!!!!!!!!!!!!! CHECK IF STILL NEED SECOND INSTANCE
-                yield checkOutInstance.save();
-                const checkOutInstanceTwo = yield checkOutModel_1.default.findOne({
-                    cart_id: userCart === null || userCart === void 0 ? void 0 : userCart._id,
-                });
-                if (checkOutInstanceTwo) {
-                    let newTotalAmountToPay = 0;
-                    checkOutInstanceTwo.items.forEach((item) => {
-                        if (item.price && item.quantity)
-                            newTotalAmountToPay += item.price * item.quantity;
-                    });
-                    checkOutInstance.totalAmountToPay = newTotalAmountToPay;
-                }
-            }
-            if (indexOfItemInCheckOutInstance == -1) {
-                checkOutInstance.items.push(itemToCheckOut);
-                checkOutInstance.totalAmountToPay += itemToCheckOut.price * itemToCheckOut.quantity;
-            }
-            yield checkOutInstance.save();
-            return res.sendStatus(200);
-        }
-    }
-    catch (error) {
-        if (error instanceof Error)
-            return res.send(error.message);
-    }
-});
-exports.addToCheckOut = addToCheckOut;
-const removeFromCheckOut = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user_id = req.authenticatedUser._id;
-        const itemToRemove = req.body.itemToRemove;
-        const userCart = yield cartModel_1.default.findOne({ cartOwner: user_id });
-        const checkOutInstance = yield checkOutModel_1.default.findOne({ cart_id: userCart === null || userCart === void 0 ? void 0 : userCart._id });
-        if (checkOutInstance) {
-            const indexOfItemInCheckOutInstance = checkOutInstance.items.findIndex((item) => {
-                return item.prod_id === itemToRemove;
-            });
-            if (indexOfItemInCheckOutInstance != -1) {
-                checkOutInstance.totalAmountToPay -=
-                    checkOutInstance.items[indexOfItemInCheckOutInstance].price *
-                        checkOutInstance.items[indexOfItemInCheckOutInstance].quantity;
-                checkOutInstance.items.splice(indexOfItemInCheckOutInstance, 1);
-                yield checkOutInstance.save();
-                return res.sendStatus(200);
-            }
-        }
-        return res.send("no items to check out found");
-    }
-    catch (error) {
-        if (error instanceof Error)
-            return res.send(error.message);
-    }
-});
-exports.removeFromCheckOut = removeFromCheckOut;
-const getToCheckOutItems = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user_id = req.authenticatedUser._id;
-        const userCart = yield cartModel_1.default.findOne({ cartOwner: user_id });
-        const toCheckOutItems = yield checkOutModel_1.default.findOne({ cart_id: userCart === null || userCart === void 0 ? void 0 : userCart._id });
-        if (toCheckOutItems) {
-            return res.send(toCheckOutItems);
-        }
-        return res.send("no items to check out found");
-    }
-    catch (error) {
-        if (error instanceof Error)
-            return res.send(error.message);
-    }
-});
-exports.getToCheckOutItems = getToCheckOutItems;

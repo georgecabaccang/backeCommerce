@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import Cart from "../models/cartModel";
 import { IItemModel } from "../types/ItemModel";
 import Product from "../models/productModel";
-import CheckOut from "../models/checkOutModel";
 
 export const getUserCart = async (req: Request, res: Response) => {
     try {
@@ -120,107 +119,6 @@ export const changeQuantity = async (req: Request, res: Response) => {
             return res.sendStatus(404);
         }
         return res.sendStatus(404);
-    } catch (error) {
-        if (error instanceof Error) return res.send(error.message);
-    }
-};
-
-export const addToCheckOut = async (req: Request, res: Response) => {
-    try {
-        const user_id = req.authenticatedUser._id;
-        const itemToCheckOut = req.body.itemToCheckOut;
-
-        const userCart = await Cart.findOne({ cartOwner: user_id });
-        const checkOutInstance = await CheckOut.findOne({
-            cart_id: userCart?._id,
-        });
-
-        if (!checkOutInstance) {
-            const newCheckOut = new CheckOut({
-                items: [itemToCheckOut],
-                totalAmountToPay: itemToCheckOut.price * itemToCheckOut.quantity,
-                cart_id: userCart?._id,
-            });
-            await newCheckOut.save();
-            return res.sendStatus(200);
-        }
-
-        if (checkOutInstance) {
-            const indexOfItemInCheckOutInstance = checkOutInstance.items.findIndex((item) => {
-                return item.prod_id === itemToCheckOut.prod_id;
-            });
-
-            if (indexOfItemInCheckOutInstance != -1) {
-                checkOutInstance.items[indexOfItemInCheckOutInstance].quantity =
-                    itemToCheckOut.quantity;
-
-                // !!!!!!!!!!!!!!!!!! CHECK IF STILL NEED SECOND INSTANCE
-                await checkOutInstance.save();
-
-                const checkOutInstanceTwo = await CheckOut.findOne({
-                    cart_id: userCart?._id,
-                });
-
-                if (checkOutInstanceTwo) {
-                    let newTotalAmountToPay: number = 0;
-                    checkOutInstanceTwo.items.forEach((item) => {
-                        if (item.price && item.quantity)
-                            newTotalAmountToPay += item.price * item.quantity;
-                    });
-                    checkOutInstance.totalAmountToPay = newTotalAmountToPay;
-                }
-            }
-
-            if (indexOfItemInCheckOutInstance == -1) {
-                checkOutInstance.items.push(itemToCheckOut);
-                checkOutInstance.totalAmountToPay += itemToCheckOut.price * itemToCheckOut.quantity;
-            }
-
-            await checkOutInstance.save();
-            return res.sendStatus(200);
-        }
-    } catch (error) {
-        if (error instanceof Error) return res.send(error.message);
-    }
-};
-
-export const removeFromCheckOut = async (req: Request, res: Response) => {
-    try {
-        const user_id = req.authenticatedUser._id;
-        const itemToRemove = req.body.itemToRemove;
-
-        const userCart = await Cart.findOne({ cartOwner: user_id });
-        const checkOutInstance = await CheckOut.findOne({ cart_id: userCart?._id });
-        if (checkOutInstance) {
-            const indexOfItemInCheckOutInstance = checkOutInstance.items.findIndex((item) => {
-                return item.prod_id === itemToRemove;
-            });
-
-            if (indexOfItemInCheckOutInstance != -1) {
-                checkOutInstance.totalAmountToPay -=
-                    checkOutInstance.items[indexOfItemInCheckOutInstance].price *
-                    checkOutInstance.items[indexOfItemInCheckOutInstance].quantity;
-
-                checkOutInstance.items.splice(indexOfItemInCheckOutInstance, 1);
-                await checkOutInstance.save();
-                return res.sendStatus(200);
-            }
-        }
-        return res.send("no items to check out found");
-    } catch (error) {
-        if (error instanceof Error) return res.send(error.message);
-    }
-};
-
-export const getToCheckOutItems = async (req: Request, res: Response) => {
-    try {
-        const user_id = req.authenticatedUser._id;
-        const userCart = await Cart.findOne({ cartOwner: user_id });
-        const toCheckOutItems = await CheckOut.findOne({ cart_id: userCart?._id });
-        if (toCheckOutItems) {
-            return res.send(toCheckOutItems);
-        }
-        return res.send("no items to check out found");
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }

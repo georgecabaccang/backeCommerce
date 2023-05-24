@@ -12,24 +12,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOrders = exports.placeOrder = void 0;
+exports.cancelOrder = exports.getOrders = exports.placeOrder = void 0;
 const cartModel_1 = __importDefault(require("../models/cartModel"));
-const checkOutModel_1 = __importDefault(require("../models/checkOutModel"));
 const orderListModel_1 = __importDefault(require("../models/orderListModel"));
-const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const placeOrder = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user_id = req.authenticatedUser._id;
         const userCart = yield cartModel_1.default.findOne({ cartOwner: user_id });
-        const checkOutInstance = yield checkOutModel_1.default.findOne({ cart_id: userCart === null || userCart === void 0 ? void 0 : userCart._id });
         const userOrders = yield orderListModel_1.default.findOne({ ordersOwner: user_id });
-        if (checkOutInstance && userOrders) {
+        if (userOrders) {
             const toBePushed = {
-                items: checkOutInstance.items,
-                totalAmount: checkOutInstance.totalAmountToPay,
+                items: req.body.items,
+                totalAmount: req.body.totalAmountToPay,
             };
             userOrders.orders.push(toBePushed);
             yield userOrders.save();
-            return res.sendStatus(200);
+            next();
         }
     }
     catch (error) {
@@ -50,3 +48,26 @@ const getOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getOrders = getOrders;
+const cancelOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const orders = yield orderListModel_1.default.findOne({ ordersOwner: user_id });
+        if (orders) {
+            const indexOfOrder = orders.orders.findIndex((order) => {
+                return order._id == req.body.order_id;
+            });
+            if (indexOfOrder != -1) {
+                orders.orders.splice(indexOfOrder, 1);
+                yield orders.save();
+                return res.sendStatus(200);
+            }
+            return res.sendStatus(404);
+        }
+        return res.sendStatus(404);
+    }
+    catch (error) {
+        if (error instanceof Error)
+            return res.send(error.message);
+    }
+});
+exports.cancelOrder = cancelOrder;

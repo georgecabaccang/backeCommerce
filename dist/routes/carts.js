@@ -11,7 +11,4 @@ cartsRoutes.post("/", authentication_1.authToken, cartControllers_1.getUserCart)
 cartsRoutes.post("/add-to-cart", authentication_1.authToken, cartControllers_1.addToCart);
 cartsRoutes.delete("/remove-from-cart", authentication_1.authToken, cartControllers_1.removeFromCart);
 cartsRoutes.put("/change-quantity", authentication_1.authToken, cartControllers_1.changeQuantity);
-cartsRoutes.post("/add-to-checkout", authentication_1.authToken, cartControllers_1.addToCheckOut);
-cartsRoutes.post("/remove-from-checkout", authentication_1.authToken, cartControllers_1.removeFromCheckOut);
-cartsRoutes.post("/get-to-checkout-items", authentication_1.authToken, cartControllers_1.getToCheckOutItems);
 exports.default = cartsRoutes;

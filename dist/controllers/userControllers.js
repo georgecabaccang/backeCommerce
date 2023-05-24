@@ -24,6 +24,9 @@ const authentication_1 = require("../security/authentication");
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userDetails = req.body;
+        const emailDuplication = yield userModel_1.default.findOne({ email: userDetails.email });
+        if (emailDuplication)
+            return res.send("email is taken");
         // Create New Cart
         const newCart = new cartModel_1.default({
             items: [],
