@@ -19,7 +19,7 @@ export const createUser = async (req: Request, res: Response) => {
         const userDetails = req.body;
 
         const emailDuplication = await User.findOne({ email: userDetails.email });
-        if (emailDuplication) return res.send("email is taken");
+        if (emailDuplication) return res.sendStatus(409);
 
         // Create New Cart
         const newCart = new Cart<ICartModel>({

@@ -18,8 +18,8 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const orderListModel_1 = __importDefault(require("../models/orderListModel"));
-const purchaseListModel_1 = __importDefault(require("../models/purchaseListModel"));
 const authentication_1 = require("../security/authentication");
+// import { IPurchasesList } from "../types/PurchaseListModel";
 // Create User
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -39,12 +39,12 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             ordersOwner: null,
         });
         const newUserOrders = yield newOrders.save();
-        // Creat new Purchases
-        const newPurchases = new purchaseListModel_1.default({
-            purchases: [],
-            purchasesOwner: null,
-        });
-        const newUserPurchases = yield newPurchases.save();
+        // // Creat new Purchases
+        // const newPurchases = new PurchaseList<IPurchasesList>({
+        //     purchases: [],
+        //     purchasesOwner: null,
+        // });
+        // const newUserPurchases = await newPurchases.save();
         // Create new User
         const hashedPassword = yield bcrypt_1.default.hash(userDetails.password, 10);
         const newUser = new userModel_1.default({
@@ -60,11 +60,11 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         yield newUserCart.save();
         newUserOrders.ordersOwner = newRegisteredUser._id;
         yield newUserOrders.save();
-        newUserPurchases.purchasesOwner = newRegisteredUser._id;
-        yield newUserPurchases.save();
+        // newUserPurchases.purchasesOwner = newRegisteredUser._id;
+        // await newUserPurchases.save();
         newRegisteredUser.userCart = newUserCart._id;
         newRegisteredUser.userOrders = newUserOrders._id;
-        newRegisteredUser.userPurchases = newUserPurchases._id;
+        // newRegisteredUser.userPurchases = newUserPurchases._id;
         yield newRegisteredUser.save();
         res.send("user created");
     }

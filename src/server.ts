@@ -5,7 +5,7 @@ import productRoutes from "./routes/products";
 import { IDBTypes } from "./types/DBTypes";
 import userRoutes from "./routes/users";
 import cartsRoutes from "./routes/carts";
-import ordersRoutes from "./routes/ordres";
+import ordersRoutes from "./routes/orders";
 
 const app = express();
 

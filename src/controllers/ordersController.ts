@@ -50,15 +50,39 @@ export const getOrders = async (req: Request, res: Response) => {
 export const cancelOrder = async (req: Request, res: Response) => {
     try {
         const user_id = req.authenticatedUser._id;
-        const orders = await OrderList.findOne({ ordersOwner: user_id });
-        if (orders) {
-            const indexOfOrder = orders.orders.findIndex((order) => {
+        const orderList = await OrderList.findOne({ ordersOwner: user_id });
+
+        if (orderList) {
+            const indexOfOrder = orderList.orders.findIndex((order) => {
                 return order._id == req.body.order_id;
             });
 
             if (indexOfOrder != -1) {
-                orders.orders.splice(indexOfOrder, 1);
-                await orders.save();
+                orderList.orders.splice(indexOfOrder, 1);
+                await orderList.save();
+                return res.sendStatus(200);
+            }
+            return res.sendStatus(404);
+        }
+        return res.sendStatus(404);
+    } catch (error) {
+        if (error instanceof Error) return res.send(error.message);
+    }
+};
+
+export const updateOrderStatusToReceived = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const orderList = await OrderList.findOne({ ordersOwner: user_id });
+
+        if (orderList) {
+            const indexOfOrderInOrders = orderList.orders.findIndex((order) => {
+                return order._id == req.body.order_id;
+            });
+
+            if (indexOfOrderInOrders != -1) {
+                orderList.orders[indexOfOrderInOrders].status = "received";
+                await orderList.save();
                 return res.sendStatus(200);
             }
             return res.sendStatus(404);

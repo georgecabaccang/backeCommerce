@@ -15,19 +15,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.cancelOrder = exports.getOrders = exports.placeOrder = void 0;
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const orderListModel_1 = __importDefault(require("../models/orderListModel"));
-const placeOrder = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user_id = req.authenticatedUser._id;
         const userCart = yield cartModel_1.default.findOne({ cartOwner: user_id });
         const userOrders = yield orderListModel_1.default.findOne({ ordersOwner: user_id });
-        if (userOrders) {
+        const items = req.body.toPurchase.items;
+        const totalAmountToPay = req.body.toPurchase.totalAmountToPay;
+        if (userOrders && userCart) {
             const toBePushed = {
-                items: req.body.items,
-                totalAmount: req.body.totalAmountToPay,
+                items: items,
+                totalAmount: totalAmountToPay,
             };
             userOrders.orders.push(toBePushed);
             yield userOrders.save();
-            next();
+            for (const itemPurchased of items) {
+                const indexOfItemInCart = userCart.items.findIndex((item) => {
+                    return item.prod_id == itemPurchased.prod_id;
+                });
+                if (indexOfItemInCart != -1) {
+                    userCart.items.splice(indexOfItemInCart, 1);
+                }
+                else {
+                    break;
+                }
+            }
+            yield userCart.save();
+            res.sendStatus(200);
         }
     }
     catch (error) {
