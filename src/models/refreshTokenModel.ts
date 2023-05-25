@@ -5,7 +5,7 @@ const refreshTokenSchema = new Schema<IRefreshToken>({
     refreshToken: { type: String, required: true },
     expireAt: {
         type: Date,
-        expires: 86400,
+        expires: 480,
         default: Date.now,
     },
 });

@@ -140,14 +140,14 @@ export const refreshLogin = async (req: Request, res: Response) => {
         if (typeof newTokens == "string") {
             return res.send(newTokens);
         } else {
-            const refrehsToken = new RefreshToken({
+            const newRefreshToken = new RefreshToken({
                 refreshToken: newTokens?.refreshToken,
             });
             // Delete old refresh token
             await RefreshToken.deleteOne({ refreshToken: refreshToken });
 
             // save new refresh token to DB
-            await refrehsToken.save();
+            await newRefreshToken.save();
 
             // return new tokens to user
             res.send(newTokens);

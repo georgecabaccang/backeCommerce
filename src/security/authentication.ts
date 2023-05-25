@@ -6,11 +6,14 @@ import { Request, Response, NextFunction } from "express";
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
+const ACCESSTOKEN_EXPIRE_TIME = "5m";
+const REFRESHTOKEN_EXPIRE_TIME = "8m";
+
 export const token = (user: IUserModelForTokensAndPayload) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
-        const accessToken = jwt.sign(user, ACCESS_TOKEN, { expiresIn: "10000m" }); // change expiresIn accordingly if testing
+        const accessToken = jwt.sign(user, ACCESS_TOKEN, { expiresIn: ACCESSTOKEN_EXPIRE_TIME });
         const refreshToken = jwt.sign({ email: user.email, _id: user._id }, REFRESH_TOKEN, {
-            expiresIn: "15m",
+            expiresIn: REFRESHTOKEN_EXPIRE_TIME,
         });
         const tokens = {
             accessToken,
@@ -32,7 +35,12 @@ export const refreshTokenFn = (refreshToken: string, userEmail: string) => {
 
         // Check if use matches provided token
         if (userDetails.email != userEmail) return "refresh token does not belong to current user";
-        return token({ email: userDetails.email, _id: userDetails._id });
+
+        const newTokens = token({ email: userDetails.email, _id: userDetails._id });
+        if (newTokens.accessToken === "no secret code given for token creation") {
+            return "failed to generate new tokens";
+        }
+        return newTokens;
     }
 };
 
