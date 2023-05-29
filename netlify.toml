@@ -11,3 +11,9 @@
   status = 200
   from = "/server/*"
   to = "/.netlify/functions/server/:splat"
+
+[[redirects]]
+  force = true
+  status = 200
+  from = "/user/*"
+  to = "/.netlify/functions/user/:splat"
