@@ -8,6 +8,6 @@
 
 [[redirects]]
   force = true
-  from = "/user/*"
   status = 200
-  to = "/.netlify/functions/routes/user/:splat"
+  from = "/server/*"
+  to = "/.netlify/functions/server/:splat"
