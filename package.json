@@ -6,8 +6,8 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "server": "nodemon dist/server.js",
-        "start": "/node_modules/.bin/netlify-lambda serve source",
-        "build": "/node_modules/.bin/netlify-lambda build source"
+        "start": "./node_modules/.bin/netlify-lambda serve source",
+        "build": "./node_modules/.bin/netlify-lambda build source"
     },
     "keywords": [],
     "author": "",
