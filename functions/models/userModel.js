@@ -6,7 +6,7 @@ const userSchema = new mongoose_1.Schema({
     password: { type: String, required: true },
     userCart: { type: mongoose_1.Schema.Types.ObjectId, ref: "Cart" },
     userOrders: { type: mongoose_1.Schema.Types.ObjectId, ref: "Order" },
-    // userPurchases: { type: Types.ObjectId, ref: "Purchase" },
+    // userPurchases: { type: Schema.Types.ObjectId, ref: "Purchase" },
 }, { timestamps: true });
 const User = (0, mongoose_1.model)("User", userSchema);
 exports.default = User;

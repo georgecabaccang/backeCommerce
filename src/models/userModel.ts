@@ -7,7 +7,7 @@ const userSchema = new Schema<IUserModel, Model<IUserModel>>(
         password: { type: String, required: true },
         userCart: { type: Schema.Types.ObjectId, ref: "Cart" },
         userOrders: { type: Schema.Types.ObjectId, ref: "Order" },
-        // userPurchases: { type: Types.ObjectId, ref: "Purchase" },
+        // userPurchases: { type: Schema.Types.ObjectId, ref: "Purchase" },
     },
     { timestamps: true }
 );

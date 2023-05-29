@@ -5,7 +5,7 @@ import { IPurchasesList } from "../types/PurchaseListModel";
 const purchaseListSchema = new Schema<IPurchasesList>(
     {
         purchases: [OrderList.schema],
-        purchasesOwner: { type: Types.ObjectId, ref: "User" },
+        purchasesOwner: { type: Schema.Types.ObjectId, ref: "User" },
     },
     { timestamps: true }
 );

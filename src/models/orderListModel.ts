@@ -5,7 +5,7 @@ import Order from "./orderModel";
 const orderListSchema = new Schema<IOrderList>(
     {
         orders: [Order.schema],
-        ordersOwner: { type: Types.ObjectId, ref: "User" },
+        ordersOwner: { type: Schema.Types.ObjectId, ref: "User" },
     },
     { timestamps: true }
 );
