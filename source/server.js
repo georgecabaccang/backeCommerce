@@ -23,10 +23,10 @@ db.once("open", () => {
 app.use(express_1.default.json({ limit: "50mb" }));
 app.use(express_1.default.urlencoded({ limit: "50mb" }));
 app.use((0, cors_1.default)());
-app.use("/.netlify/functions/api/user", users_1.default);
-app.use("/.netlify/functions/api/shop", products_1.default);
-app.use("/.netlify/functions/api/cart", carts_1.default);
-app.use("/.netlify/functions/api/orders", orders_1.default);
+app.use("/.netlify/source/routes/user", users_1.default);
+app.use("/.netlify/source/routes/shop", products_1.default);
+app.use("/.netlify/source/routes/cart", carts_1.default);
+app.use("/.netlify/source/routes/orders", orders_1.default);
 app.listen(8002, () => {
     console.log("Port 8002");
 });
