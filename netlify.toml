@@ -16,4 +16,4 @@
   force = true
   status = 200
   from = "/user/*"
-  to = "/.netlify/functions/user/:splat"
+  to = "/.netlify/functions/users/:splat"

@@ -48,7 +48,7 @@ app.use((0, cors_1.default)());
 const route = (0, express_1.Router)();
 route.get("/hello", (req, res) => res.send("Hello World!"));
 app.use("/server", route);
-app.use("/user", users_1.default);
+app.use("/users", users_1.default);
 // app.use("/shop", productRoutes);
 // app.use("/cart", cartsRoutes);
 // app.use("/orders", ordersRoutes);
