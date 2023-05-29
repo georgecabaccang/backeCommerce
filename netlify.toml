@@ -10,7 +10,7 @@
 [[redirects]]
   force = true
   status = 200
-  from = "/home/*"
+  from = "/server/*"
   to = "/.netlify/functions/server/:splat"
 
 [[redirects]]
