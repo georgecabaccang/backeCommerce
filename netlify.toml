@@ -10,4 +10,4 @@
   force = true
   from = "/user/*"
   status = 200
-  to = "/.netlify/functions/user/:splat"
+  to = "/.netlify/functions/routes/user/:splat"
