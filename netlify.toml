@@ -2,12 +2,12 @@
    functions = "functions"
 
 [functions]
-  external_node_modules = ["express"]
+  external_node_modules = ["express", "mongodb"]
   node_bundler = "esbuild"
  
 
 [[redirects]]
   force = true
-  from = "/api/*"
+  from = "/server/*"
   status = 200
   to = "/.netlify/functions/server/:splat"
