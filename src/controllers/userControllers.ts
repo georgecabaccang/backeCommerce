@@ -86,7 +86,7 @@ export const login = async (req: Request, res: Response) => {
         });
         if (!user) {
             // return res.sendStatus(404);
-            return res.send('no such user')
+            return res.sendStatus(404);
         }
 
         // Check if passwords match

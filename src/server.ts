@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 import express, { Router } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -11,9 +13,7 @@ import ordersRoutes from "./routes/orders";
 import bodyParser from "body-parser";
 
 const app = express();
-mongoose.connect(
-    "mongodb+srv://miniprojects:thenewpassword@projects.wpbsykb.mongodb.net/eCommerce?retryWrites=true&w=majority"
-);
+mongoose.connect(process.env.MONGO_DB as string);
 
 const db = mongoose.connection;
 db.on("error", (error: IDBTypes) => {

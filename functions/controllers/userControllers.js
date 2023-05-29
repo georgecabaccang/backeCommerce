@@ -85,7 +85,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
         if (!user) {
             // return res.sendStatus(404);
-            return res.send('no such user');
+            return res.sendStatus(404);
         }
         // Check if passwords match
         const match = yield bcrypt_1.default.compare(userCredentials.password, user.password);
