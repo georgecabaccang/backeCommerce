@@ -50,7 +50,7 @@ app.use(express_1.default.urlencoded({ limit: "50mb" }));
 app.use((0, cors_1.default)());
 const route = (0, express_1.Router)();
 route.get("/hello", (req, res) => res.send("Hello World!"));
-app.use("/server/", route);
+app.use("/server", route);
 app.use("/user", users_1.default);
 app.use("/shop", products_1.default);
 app.use("/cart", carts_1.default);
