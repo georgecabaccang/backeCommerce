@@ -7,8 +7,8 @@ import userRoutes from "./routes/users";
 import cartsRoutes from "./routes/carts";
 import ordersRoutes from "./routes/orders";
 
-import serverless from "serverless-http";
-import bodyParser from "body-parser";
+const serverless = require("serverless-http");
+const bodyParser = require("body-parser");
 
 const app = express();
 mongoose.connect(
