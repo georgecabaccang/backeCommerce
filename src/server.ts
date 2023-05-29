@@ -31,10 +31,10 @@ const route = Router();
 route.get("/hello", (req, res) => res.send("Hello World!"));
 app.use("/server", route);
 
-app.use("/user", userRoutes);
-app.use("/shop", productRoutes);
-app.use("/cart", cartsRoutes);
-app.use("/orders", ordersRoutes);
+// app.use("/user", userRoutes);
+// app.use("/shop", productRoutes);
+// app.use("/cart", cartsRoutes);
+// app.use("/orders", ordersRoutes);
 
 app.listen(8002, () => {
     console.log("Port 8002");
