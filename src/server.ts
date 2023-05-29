@@ -27,11 +27,9 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
 app.use(cors());
 
-// const route = Router();
-// route.get('/hello', (req, res) => res.send('Hello World!'));
-// app.use("/.netlify/functions/server", (req, res) => {
-//     return res.send("well....");
-// });
+const route = Router();
+route.get("/hello", (req, res) => res.send("Hello World!"));
+app.use("/server/", route);
 
 app.use("/user", userRoutes);
 app.use("/shop", productRoutes);
