@@ -85,14 +85,13 @@ export const login = async (req: Request, res: Response) => {
             email: userCredentials.email,
         });
         if (!user) {
-            res.send("user not found");
-            return;
+            return res.sendStatus(404);
         }
 
         // Check if passwords match
         const match = await bcrypt.compare(userCredentials.password, user.password);
         if (!match) {
-            res.send("incorrect password");
+            res.sendStatus(401);
             return;
         }
 
