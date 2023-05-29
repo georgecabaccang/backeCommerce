@@ -25,6 +25,7 @@ app.use(body_parser_1.default.json());
 app.use(express_1.default.json({ limit: "50mb" }));
 app.use(express_1.default.urlencoded({ limit: "50mb" }));
 app.use((0, cors_1.default)());
+app.use("/.netlify/functions/server", (req, res) => { return res.send("well...."); });
 app.use("/.netlify/functions/routes/users", users_1.default);
 app.use("/.netlify/functions/routes/shops", products_1.default);
 app.use("/.netlify/functions/routes/carts", carts_1.default);
