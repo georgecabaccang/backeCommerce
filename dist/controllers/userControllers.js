@@ -26,7 +26,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const userDetails = req.body;
         const emailDuplication = yield userModel_1.default.findOne({ email: userDetails.email });
         if (emailDuplication)
-            return res.send("email is taken");
+            return res.sendStatus(409);
         // Create New Cart
         const newCart = new cartModel_1.default({
             items: [],
@@ -84,13 +84,12 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             email: userCredentials.email,
         });
         if (!user) {
-            res.send("user not found");
-            return;
+            return res.sendStatus(404);
         }
         // Check if passwords match
         const match = yield bcrypt_1.default.compare(userCredentials.password, user.password);
         if (!match) {
-            res.send("incorrect password");
+            res.sendStatus(401);
             return;
         }
         // If everything is a-okay
@@ -135,13 +134,13 @@ const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             return res.send(newTokens);
         }
         else {
-            const refrehsToken = new refreshTokenModel_1.default({
+            const newRefreshToken = new refreshTokenModel_1.default({
                 refreshToken: newTokens === null || newTokens === void 0 ? void 0 : newTokens.refreshToken,
             });
             // Delete old refresh token
             yield refreshTokenModel_1.default.deleteOne({ refreshToken: refreshToken });
             // save new refresh token to DB
-            yield refrehsToken.save();
+            yield newRefreshToken.save();
             // return new tokens to user
             res.send(newTokens);
         }
