@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cancelOrder = exports.getOrders = exports.placeOrder = void 0;
+exports.updateOrderStatusToReceived = exports.cancelOrder = exports.getOrders = exports.placeOrder = void 0;
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const orderListModel_1 = __importDefault(require("../models/orderListModel"));
 const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -65,14 +65,14 @@ exports.getOrders = getOrders;
 const cancelOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user_id = req.authenticatedUser._id;
-        const orders = yield orderListModel_1.default.findOne({ ordersOwner: user_id });
-        if (orders) {
-            const indexOfOrder = orders.orders.findIndex((order) => {
+        const orderList = yield orderListModel_1.default.findOne({ ordersOwner: user_id });
+        if (orderList) {
+            const indexOfOrder = orderList.orders.findIndex((order) => {
                 return order._id == req.body.order_id;
             });
             if (indexOfOrder != -1) {
-                orders.orders.splice(indexOfOrder, 1);
-                yield orders.save();
+                orderList.orders.splice(indexOfOrder, 1);
+                yield orderList.save();
                 return res.sendStatus(200);
             }
             return res.sendStatus(404);
@@ -85,3 +85,26 @@ const cancelOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.cancelOrder = cancelOrder;
+const updateOrderStatusToReceived = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const orderList = yield orderListModel_1.default.findOne({ ordersOwner: user_id });
+        if (orderList) {
+            const indexOfOrderInOrders = orderList.orders.findIndex((order) => {
+                return order._id == req.body.order_id;
+            });
+            if (indexOfOrderInOrders != -1) {
+                orderList.orders[indexOfOrderInOrders].status = "received";
+                yield orderList.save();
+                return res.sendStatus(200);
+            }
+            return res.sendStatus(404);
+        }
+        return res.sendStatus(404);
+    }
+    catch (error) {
+        if (error instanceof Error)
+            return res.send(error.message);
+    }
+});
+exports.updateOrderStatusToReceived = updateOrderStatusToReceived;
