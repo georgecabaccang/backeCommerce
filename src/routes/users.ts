@@ -3,6 +3,9 @@ import { createUser, login, logout, refreshLogin } from "../controllers/userCont
 
 const userRoutes = express.Router();
 
+userRoutes.get("/test", (req, res) => {
+    res.send("from user");
+});
 userRoutes.get("/all-users");
 userRoutes.post("/register", createUser);
 userRoutes.post("/login", login);
