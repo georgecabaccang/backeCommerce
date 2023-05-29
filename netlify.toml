@@ -1,5 +1,5 @@
-[build]
-  functions = "functions"
+[functions]
+  directory = "src"
 
 [dev]
   publish = "dist"
