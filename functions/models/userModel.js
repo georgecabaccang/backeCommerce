@@ -4,7 +4,7 @@ const mongoose_1 = require("mongoose");
 const userSchema = new mongoose_1.Schema({
     email: { type: String, required: true },
     password: { type: String, required: true },
-    userCart: { type: mongoose_1.Types.ObjectId, ref: "Cart" },
+    userCart: { type: mongoose_1.Schema.Types.ObjectId, ref: "Cart" },
     userOrders: { type: mongoose_1.Types.ObjectId, ref: "Order" },
     // userPurchases: { type: Types.ObjectId, ref: "Purchase" },
 }, { timestamps: true });
