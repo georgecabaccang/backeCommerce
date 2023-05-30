@@ -71,7 +71,7 @@ const cancelOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 return order._id == req.body.order_id;
             });
             if (indexOfOrder != -1) {
-                orderList.orders.splice(indexOfOrder, 1);
+                orderList.orders[indexOfOrder].status = "cancelled";
                 yield orderList.save();
                 return res.sendStatus(200);
             }
@@ -95,6 +95,7 @@ const updateOrderStatusToReceived = (req, res) => __awaiter(void 0, void 0, void
             });
             if (indexOfOrderInOrders != -1) {
                 orderList.orders[indexOfOrderInOrders].status = "received";
+                orderList.orders[indexOfOrderInOrders].dateReceived = new Date;
                 yield orderList.save();
                 return res.sendStatus(200);
             }
