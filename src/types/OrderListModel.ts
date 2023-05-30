@@ -9,6 +9,7 @@ export interface IOrder {
         discount: number;
         image: string;
     }>;
+    dateReceived?: Date;
     totalAmount: number;
     status?: string;
     _id?: string;

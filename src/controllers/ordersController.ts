@@ -58,7 +58,7 @@ export const cancelOrder = async (req: Request, res: Response) => {
             });
 
             if (indexOfOrder != -1) {
-                orderList.orders.splice(indexOfOrder, 1);
+                orderList.orders[indexOfOrder].status = "cancelled";
                 await orderList.save();
                 return res.sendStatus(200);
             }
@@ -82,6 +82,7 @@ export const updateOrderStatusToReceived = async (req: Request, res: Response) =
 
             if (indexOfOrderInOrders != -1) {
                 orderList.orders[indexOfOrderInOrders].status = "received";
+                orderList.orders[indexOfOrderInOrders].dateReceived = new Date();
                 await orderList.save();
                 return res.sendStatus(200);
             }
