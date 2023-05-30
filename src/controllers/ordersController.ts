@@ -82,7 +82,7 @@ export const updateOrderStatusToReceived = async (req: Request, res: Response) =
 
             if (indexOfOrderInOrders != -1) {
                 orderList.orders[indexOfOrderInOrders].status = "received";
-                orderList.orders[indexOfOrderInOrders].dateReceived = new Date();
+                orderList.orders[indexOfOrderInOrders].dateReceived = new Date;
                 await orderList.save();
                 return res.sendStatus(200);
             }
