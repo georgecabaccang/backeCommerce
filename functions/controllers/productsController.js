@@ -12,9 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createCart = exports.getProductDetails = exports.addProducts = exports.getProducts = void 0;
+exports.searchProducts = exports.getProductDetails = exports.addProducts = exports.getProducts = void 0;
 const productModel_1 = __importDefault(require("../models/productModel"));
-const cartModel_1 = __importDefault(require("../models/cartModel"));
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const product = yield productModel_1.default.find();
@@ -61,15 +60,16 @@ const getProductDetails = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.getProductDetails = getProductDetails;
-// JUST FOR CREATE A TEMP CART
-const createCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const searchProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newCart = new cartModel_1.default({
-            items: [],
-        });
-        yield newCart.save();
-        res.send(newCart);
+        const query = req.body.query;
+        const products = yield productModel_1.default.find({ productName: { $regex: query, $options: "i" } });
+        res.send(products);
     }
-    catch (error) { }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send({ message: error.message });
+        }
+    }
 });
-exports.createCart = createCart;
+exports.searchProducts = searchProducts;

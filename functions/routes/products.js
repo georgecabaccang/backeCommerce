@@ -9,4 +9,5 @@ const productsController_1 = require("../controllers/productsController");
 productRoutes.get("/", productsController_1.getProducts);
 productRoutes.get("/product/:_id", productsController_1.getProductDetails);
 productRoutes.post("/add-product", productsController_1.addProducts);
+productRoutes.post("/search-products", productsController_1.searchProducts);
 exports.default = productRoutes;
