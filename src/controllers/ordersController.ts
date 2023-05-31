@@ -79,10 +79,9 @@ export const updateOrderStatusToReceived = async (req: Request, res: Response) =
             const indexOfOrderInOrders = orderList.orders.findIndex((order) => {
                 return order._id == req.body.order_id;
             });
-
+            // REMOVED DATE OF RECIEVED
             if (indexOfOrderInOrders != -1) {
                 orderList.orders[indexOfOrderInOrders].status = "received";
-                orderList.orders[indexOfOrderInOrders].dateReceived = new Date;
                 await orderList.save();
                 return res.sendStatus(200);
             }

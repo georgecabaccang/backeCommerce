@@ -95,7 +95,6 @@ const updateOrderStatusToReceived = (req, res) => __awaiter(void 0, void 0, void
             });
             if (indexOfOrderInOrders != -1) {
                 orderList.orders[indexOfOrderInOrders].status = "received";
-                orderList.orders[indexOfOrderInOrders].dateReceived = new Date;
                 yield orderList.save();
                 return res.sendStatus(200);
             }
