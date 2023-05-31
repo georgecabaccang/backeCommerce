@@ -48,14 +48,14 @@ export const getProductDetails = async (req: Request, res: Response) => {
     }
 };
 
-// JUST FOR CREATE A TEMP CART
-
-export const createCart = async (req: Request, res: Response) => {
+export const searchProducts = async (req: Request, res: Response) => {
     try {
-        const newCart = new Cart({
-            items: [],
-        });
-        await newCart.save();
-        res.send(newCart);
-    } catch (error) {}
+        const query = req.body.query;
+        const products = await Product.find({ productName: { $regex: query, $options: "i" } });
+        res.send(products);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send({ message: error.message });
+        }
+    }
 };
