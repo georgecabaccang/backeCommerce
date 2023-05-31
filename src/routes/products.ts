@@ -11,6 +11,6 @@ import {
 productRoutes.get("/", getProducts);
 productRoutes.get("/product/:_id", getProductDetails);
 productRoutes.post("/add-product", addProducts);
-productRoutes.get("/search-products", searchProducts);
+productRoutes.post("/search-products", searchProducts);
 
 export default productRoutes;
