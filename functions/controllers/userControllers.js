@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.refreshLogin = exports.login = exports.createUser = void 0;
+exports.logout = exports.refreshLogin = exports.getUserProfile = exports.login = exports.createUser = void 0;
 const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const userModel_1 = __importDefault(require("../models/userModel"));
@@ -50,6 +50,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const newUser = new userModel_1.default({
             email: userDetails.email,
             password: hashedPassword,
+            isSeller: false,
             userCart: null,
             userOrders: null,
             userPurchases: null,
@@ -109,7 +110,8 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
         yield refrehsToken.save();
         // Send Access Token of user back
-        res.send({ tokens: tokens });
+        res.send({ tokens: tokens, user_id: user._id });
+        // res.send({ userPayload: userPayload });
     }
     catch (error) {
         if (error instanceof Error) {
@@ -118,6 +120,26 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.login = login;
+const getUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user_id = req.params.user_id;
+        const user = yield userModel_1.default.findById(user_id);
+        if (user) {
+            const userDetails = {
+                email: user.email,
+                password: user.password,
+                isSeller: user.isSeller,
+            };
+            res.send(userDetails);
+        }
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+});
+exports.getUserProfile = getUserProfile;
 const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.body.refreshToken;
