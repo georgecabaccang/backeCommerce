@@ -117,6 +117,7 @@ export const login = async (req: Request, res: Response) => {
 
         // Send Access Token of user back
         res.send({ tokens: tokens, user_id: user._id });
+        // res.send({ userPayload: userPayload });
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);
