@@ -5,9 +5,9 @@ const userSchema = new Schema<IUserModel, Model<IUserModel>>(
     {
         email: { type: String, required: true },
         password: { type: String, required: true },
+        isSeller: { type: Boolean, default: false },
         userCart: { type: Schema.Types.ObjectId, ref: "Cart" },
         userOrders: { type: Schema.Types.ObjectId, ref: "Order" },
-        // userPurchases: { type: Schema.Types.ObjectId, ref: "Purchase" },
     },
     { timestamps: true }
 );

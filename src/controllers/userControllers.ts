@@ -5,7 +5,6 @@ import bcrypt from "bcrypt";
 import User from "../models/userModel";
 import Cart from "../models/cartModel";
 import OrderList from "../models/orderListModel";
-import PurchaseList from "../models/purchaseListModel";
 
 import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
@@ -47,6 +46,7 @@ export const createUser = async (req: Request, res: Response) => {
         const newUser = new User<IUserModel>({
             email: userDetails.email,
             password: hashedPassword,
+            isSeller: false,
             userCart: null,
             userOrders: null,
             userPurchases: null,
@@ -116,7 +116,26 @@ export const login = async (req: Request, res: Response) => {
         await refrehsToken.save();
 
         // Send Access Token of user back
-        res.send({ tokens: tokens });
+        res.send({ tokens: tokens, user_id: user._id });
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+};
+
+export const getUserProfile = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.params.user_id;
+        const user = await User.findById(user_id);
+        if (user) {
+            const userDetails = {
+                email: user.email,
+                password: user.password,
+                isSeller: user.isSeller,
+            };
+            res.send(userDetails);
+        }
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);

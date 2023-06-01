@@ -4,6 +4,7 @@ import { Types } from "mongoose";
 export interface IUserModel {
     email: string;
     password: string;
+    isSeller: boolean;
     userCart?: Types.ObjectId | null;
     userOrders?: Types.ObjectId | null;
     userPurchases?: Types.ObjectId | null;
