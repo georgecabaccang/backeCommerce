@@ -116,7 +116,7 @@ export const login = async (req: Request, res: Response) => {
         await refrehsToken.save();
 
         // Send Access Token of user back
-        res.send({ tokens: tokens, user_id: user._id });
+        res.send({ tokens: tokens, userDetails: { ...userPayload, isSeller: user.isSeller } });
         // res.send({ userPayload: userPayload });
     } catch (error) {
         if (error instanceof Error) {
@@ -125,24 +125,25 @@ export const login = async (req: Request, res: Response) => {
     }
 };
 
-export const getUserProfile = async (req: Request, res: Response) => {
-    try {
-        const user_id = req.params.user_id;
-        const user = await User.findById(user_id);
-        if (user) {
-            const userDetails = {
-                email: user.email,
-                password: user.password,
-                isSeller: user.isSeller,
-            };
-            res.send(userDetails);
-        }
-    } catch (error) {
-        if (error instanceof Error) {
-            res.send(error.message);
-        }
-    }
-};
+// export const getUserProfile = async (req: Request, res: Response) => {
+//     try {
+//         const user_id = req.params.user_id;
+//         const user = await User.findById(user_id);
+
+//         if (user) {
+//             const userDetails = {
+//                 email: user.email,
+//                 password: user.password,
+//                 isSeller: user.isSeller,
+//             };
+//             res.send(userDetails);
+//         }
+//     } catch (error) {
+//         if (error instanceof Error) {
+//             res.send(error.message);
+//         }
+//     }
+// };
 
 export const refreshLogin = async (req: Request, res: Response) => {
     try {
