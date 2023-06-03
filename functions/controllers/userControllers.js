@@ -152,9 +152,9 @@ const updateSellerStatus = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (user) {
             user.isSeller = !user.isSeller;
             yield user.save();
-            res.send(user);
+            return res.send({ _id: user._id, email: user.email, isSeller: user.isSeller });
         }
-        res.sendStatus(404);
+        return res.sendStatus(404);
     }
     catch (error) {
         if (error instanceof Error) {

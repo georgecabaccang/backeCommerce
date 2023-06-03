@@ -155,9 +155,9 @@ export const updateSellerStatus = async (req: Request, res: Response) => {
         if (user) {
             user.isSeller = !user.isSeller;
             await user.save();
-            res.send(user);
+            return res.send({ _id: user._id, email: user.email, isSeller: user.isSeller });
         }
-        res.sendStatus(404);
+        return res.sendStatus(404);
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);
