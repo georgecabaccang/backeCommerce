@@ -10,7 +10,6 @@ import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
 import { refreshTokenFn, token } from "../security/authentication";
 import { IOrderList } from "../types/OrderListModel";
-// import { IPurchasesList } from "../types/PurchaseListModel";
 
 // Create User
 export const createUser = async (req: Request, res: Response) => {
@@ -34,13 +33,6 @@ export const createUser = async (req: Request, res: Response) => {
         });
         const newUserOrders = await newOrders.save();
 
-        // // Creat new Purchases
-        // const newPurchases = new PurchaseList<IPurchasesList>({
-        //     purchases: [],
-        //     purchasesOwner: null,
-        // });
-        // const newUserPurchases = await newPurchases.save();
-
         // Create new User
         const hashedPassword = await bcrypt.hash(userDetails.password, 10);
         const newUser = new User<IUserModel>({
@@ -60,12 +52,8 @@ export const createUser = async (req: Request, res: Response) => {
         newUserOrders.ordersOwner = newRegisteredUser._id;
         await newUserOrders.save();
 
-        // newUserPurchases.purchasesOwner = newRegisteredUser._id;
-        // await newUserPurchases.save();
-
         newRegisteredUser.userCart = newUserCart._id;
         newRegisteredUser.userOrders = newUserOrders._id;
-        // newRegisteredUser.userPurchases = newUserPurchases._id;
         await newRegisteredUser.save();
 
         res.send("user created");
@@ -125,26 +113,6 @@ export const login = async (req: Request, res: Response) => {
     }
 };
 
-// export const getUserProfile = async (req: Request, res: Response) => {
-//     try {
-//         const user_id = req.params.user_id;
-//         const user = await User.findById(user_id);
-
-//         if (user) {
-//             const userDetails = {
-//                 email: user.email,
-//                 password: user.password,
-//                 isSeller: user.isSeller,
-//             };
-//             res.send(userDetails);
-//         }
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             res.send(error.message);
-//         }
-//     }
-// };
-
 export const refreshLogin = async (req: Request, res: Response) => {
     try {
         const refreshToken = req.body.refreshToken;
@@ -173,6 +141,23 @@ export const refreshLogin = async (req: Request, res: Response) => {
             // return new tokens to user
             res.send(newTokens);
         }
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+};
+
+export const updateSellerStatus = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.params.user_id;
+        const user = await User.findById(user_id);
+        if (user) {
+            user.isSeller = !user.isSeller;
+            await user.save();
+            res.send(user);
+        }
+        res.sendStatus(404);
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);

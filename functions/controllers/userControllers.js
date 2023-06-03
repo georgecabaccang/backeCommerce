@@ -12,14 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.refreshLogin = exports.login = exports.createUser = void 0;
+exports.logout = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
 const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const orderListModel_1 = __importDefault(require("../models/orderListModel"));
 const authentication_1 = require("../security/authentication");
-// import { IPurchasesList } from "../types/PurchaseListModel";
 // Create User
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -39,12 +38,6 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             ordersOwner: null,
         });
         const newUserOrders = yield newOrders.save();
-        // // Creat new Purchases
-        // const newPurchases = new PurchaseList<IPurchasesList>({
-        //     purchases: [],
-        //     purchasesOwner: null,
-        // });
-        // const newUserPurchases = await newPurchases.save();
         // Create new User
         const hashedPassword = yield bcrypt_1.default.hash(userDetails.password, 10);
         const newUser = new userModel_1.default({
@@ -61,11 +54,8 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         yield newUserCart.save();
         newUserOrders.ordersOwner = newRegisteredUser._id;
         yield newUserOrders.save();
-        // newUserPurchases.purchasesOwner = newRegisteredUser._id;
-        // await newUserPurchases.save();
         newRegisteredUser.userCart = newUserCart._id;
         newRegisteredUser.userOrders = newUserOrders._id;
-        // newRegisteredUser.userPurchases = newUserPurchases._id;
         yield newRegisteredUser.save();
         res.send("user created");
     }
@@ -120,24 +110,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.login = login;
-// export const getUserProfile = async (req: Request, res: Response) => {
-//     try {
-//         const user_id = req.params.user_id;
-//         const user = await User.findById(user_id);
-//         if (user) {
-//             const userDetails = {
-//                 email: user.email,
-//                 password: user.password,
-//                 isSeller: user.isSeller,
-//             };
-//             res.send(userDetails);
-//         }
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             res.send(error.message);
-//         }
-//     }
-// };
 const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.body.refreshToken;
@@ -173,6 +145,24 @@ const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.refreshLogin = refreshLogin;
+const updateSellerStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user_id = req.params.user_id;
+        const user = yield userModel_1.default.findById(user_id);
+        if (user) {
+            user.isSeller = !user.isSeller;
+            yield user.save();
+            res.send(user);
+        }
+        res.sendStatus(404);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+});
+exports.updateSellerStatus = updateSellerStatus;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.body.refreshToken;
