@@ -165,6 +165,31 @@ export const updateSellerStatus = async (req: Request, res: Response) => {
     }
 };
 
+export const changePassword = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.params.user_id;
+        const oldPassword = req.body.oldPassword;
+        const newPassword = req.body.newPassword;
+        const user = await User.findById(user_id);
+
+        if (user) {
+            const oldPasswordsMatch = await bcrypt.compare(oldPassword, user.password);
+            if (oldPasswordsMatch) {
+                const hashedPassword = await bcrypt.hash(newPassword, 10);
+                user.password = hashedPassword;
+                await user.save();
+                return res.send("password changed");
+            }
+            return res.send("incorrect password");
+        }
+        return res.sendStatus(404);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+};
+
 export const logout = async (req: Request, res: Response) => {
     try {
         const refreshToken = req.body.refreshToken;

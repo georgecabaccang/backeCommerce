@@ -9,6 +9,7 @@ const authentication_1 = require("../security/authentication");
 const userRoutes = express_1.default.Router();
 userRoutes.get("/all-users");
 userRoutes.patch("/:user_id/update-user-type", authentication_1.authToken, userControllers_1.updateSellerStatus);
+userRoutes.patch("/:user_id/change-password", authentication_1.authToken, userControllers_1.changePassword);
 userRoutes.post("/register", userControllers_1.createUser);
 userRoutes.post("/login", userControllers_1.login);
 userRoutes.post("/refreshlogin", userControllers_1.refreshLogin);

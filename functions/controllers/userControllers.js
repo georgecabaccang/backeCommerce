@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
+exports.logout = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
 const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const userModel_1 = __importDefault(require("../models/userModel"));
@@ -163,6 +163,31 @@ const updateSellerStatus = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.updateSellerStatus = updateSellerStatus;
+const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user_id = req.params.user_id;
+        const oldPassword = req.body.oldPassword;
+        const newPassword = req.body.newPassword;
+        const user = yield userModel_1.default.findById(user_id);
+        if (user) {
+            const oldPasswordsMatch = yield bcrypt_1.default.compare(oldPassword, user.password);
+            if (oldPasswordsMatch) {
+                const hashedPassword = yield bcrypt_1.default.hash(newPassword, 10);
+                user.password = hashedPassword;
+                yield user.save();
+                return res.send("password changed");
+            }
+            return res.send("incorrect password");
+        }
+        return res.sendStatus(404);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+});
+exports.changePassword = changePassword;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.body.refreshToken;
