@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
+exports.logout = exports.getUserProfileDetails = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
 require("dotenv").config();
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const crypto_js_1 = __importDefault(require("crypto-js"));
@@ -77,12 +77,12 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             email: userCredentials.email,
         });
         if (!user) {
-            return res.sendStatus(404);
+            return res.send("user not found");
         }
         // Check if passwords match
         const match = yield bcrypt_1.default.compare(userCredentials.password, user.password);
         if (!match) {
-            res.sendStatus(401);
+            res.send("wrong password");
             return;
         }
         // If everything is a-okay
@@ -142,6 +142,7 @@ const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             // return new tokens to user
             res.cookie("refreshToken", newTokens === null || newTokens === void 0 ? void 0 : newTokens.refreshToken);
             res.cookie("accessToken", newTokens === null || newTokens === void 0 ? void 0 : newTokens.accessToken);
+            return res.send("OK");
         }
     }
     catch (error) {
@@ -158,7 +159,7 @@ const updateSellerStatus = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (user) {
             user.isSeller = !user.isSeller;
             yield user.save();
-            return res.send({ _id: user._id, email: user.email, isSeller: user.isSeller });
+            return res.send("OK");
         }
         return res.sendStatus(404);
     }
@@ -194,29 +195,41 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.changePassword = changePassword;
-// export const getUserProfileDetails = async (req: Request, res: Response) => {
-//     try {
-//         const user_id = req.authenticatedUser.email;
-//         const user = await User.findById(user_id);
-//         if (user) {
-//             const userDetails = {
-//                 email: user.email,
-//                 _id: user._id,
-//                 isSeller: user.isSeller,
-//             };
-//             return res.send(user_id);
-//         }
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             res.send(error.message);
-//         }
-//     }
-// };
+const getUserProfileDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const user = yield userModel_1.default.findById(user_id);
+        if (user) {
+            const userDetails = {
+                email: user.email,
+                _id: user._id,
+                isSeller: user.isSeller,
+            };
+            const encUserDetails = crypto_js_1.default.AES.encrypt(JSON.stringify(userDetails), process.env.CRYPTO_HASHER).toString();
+            return res.send(encUserDetails);
+        }
+        return res.send("user not found");
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+});
+exports.getUserProfileDetails = getUserProfileDetails;
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const refreshToken = req.body.refreshToken;
-        const deleted = yield refreshTokenModel_1.default.deleteOne({ refreshToken: refreshToken });
-        res.send(deleted);
+        const refreshToken = req.cookies.refreshToken;
+        if (refreshToken) {
+            const deleted = yield refreshTokenModel_1.default.deleteOne({ refreshToken: refreshToken });
+            if (deleted.deletedCount != 0) {
+                res.clearCookie("accessToken");
+                res.clearCookie("refreshToken");
+                return res.send(deleted);
+            }
+            return res.send("nothing deleted");
+        }
+        return res.send("no refreshToken");
     }
     catch (error) {
         if (error instanceof Error) {

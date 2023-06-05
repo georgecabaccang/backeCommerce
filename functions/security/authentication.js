@@ -47,9 +47,8 @@ const refreshTokenFn = (refreshToken, userEmail) => {
 exports.refreshTokenFn = refreshTokenFn;
 const authToken = (req, res, next) => {
     try {
-        const header = req.headers.authorization;
         const email = req.body.email;
-        const token = header && header.split(" ")[1];
+        const token = req.cookies.accessToken;
         if (!token)
             return res.send("no token provided");
         if (ACCESS_TOKEN) {

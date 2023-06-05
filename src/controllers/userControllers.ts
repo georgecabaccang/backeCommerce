@@ -78,13 +78,13 @@ export const login = async (req: Request, res: Response) => {
             email: userCredentials.email,
         });
         if (!user) {
-            return res.sendStatus(404);
+            return res.send("user not found");
         }
 
         // Check if passwords match
         const match = await bcrypt.compare(userCredentials.password, user.password);
         if (!match) {
-            res.sendStatus(401);
+            res.send("wrong password");
             return;
         }
 
@@ -129,6 +129,7 @@ export const refreshLogin = async (req: Request, res: Response) => {
     try {
         const refreshToken = req.cookies.refreshToken;
         const userEmail = req.authenticatedUser.email;
+
         // check if refresh token is provided and valid
         if (!refreshToken) return res.send("no refresh token provided");
         const validRefreshToken = await RefreshToken.findOne({ refreshToken: refreshToken });
@@ -153,6 +154,7 @@ export const refreshLogin = async (req: Request, res: Response) => {
             // return new tokens to user
             res.cookie("refreshToken", newTokens?.refreshToken);
             res.cookie("accessToken", newTokens?.accessToken);
+            return res.send("OK");
         }
     } catch (error) {
         if (error instanceof Error) {
@@ -168,7 +170,7 @@ export const updateSellerStatus = async (req: Request, res: Response) => {
         if (user) {
             user.isSeller = !user.isSeller;
             await user.save();
-            return res.send({ _id: user._id, email: user.email, isSeller: user.isSeller });
+            return res.send("OK");
         }
         return res.sendStatus(404);
     } catch (error) {
@@ -203,30 +205,43 @@ export const changePassword = async (req: Request, res: Response) => {
     }
 };
 
-// export const getUserProfileDetails = async (req: Request, res: Response) => {
-//     try {
-//         const user_id = req.authenticatedUser.email;
-//         const user = await User.findById(user_id);
-//         if (user) {
-//             const userDetails = {
-//                 email: user.email,
-//                 _id: user._id,
-//                 isSeller: user.isSeller,
-//             };
-//             return res.send(user_id);
-//         }
-//     } catch (error) {
-//         if (error instanceof Error) {
-//             res.send(error.message);
-//         }
-//     }
-// };
+export const getUserProfileDetails = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const user = await User.findById(user_id);
+        if (user) {
+            const userDetails = {
+                email: user.email,
+                _id: user._id,
+                isSeller: user.isSeller,
+            };
+            const encUserDetails = CryptoJS.AES.encrypt(
+                JSON.stringify(userDetails),
+                process.env.CRYPTO_HASHER!
+            ).toString();
+            return res.send(encUserDetails);
+        }
+        return res.send("user not found");
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+};
 
 export const logout = async (req: Request, res: Response) => {
     try {
-        const refreshToken = req.body.refreshToken;
-        const deleted = await RefreshToken.deleteOne({ refreshToken: refreshToken });
-        res.send(deleted);
+        const refreshToken = req.cookies.refreshToken;
+        if (refreshToken) {
+            const deleted = await RefreshToken.deleteOne({ refreshToken: refreshToken });
+            if (deleted.deletedCount != 0) {
+                res.clearCookie("accessToken");
+                res.clearCookie("refreshToken");
+                return res.send(deleted);
+            }
+            return res.send("nothing deleted");
+        }
+        return res.send("no refreshToken");
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);
