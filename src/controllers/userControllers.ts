@@ -127,7 +127,7 @@ export const login = async (req: Request, res: Response) => {
 
 export const refreshLogin = async (req: Request, res: Response) => {
     try {
-        const refreshToken = req.body.refreshToken;
+        const refreshToken = req.cookies.refreshToken;
         const userEmail = req.authenticatedUser.email;
         // check if refresh token is provided and valid
         if (!refreshToken) return res.send("no refresh token provided");
@@ -151,7 +151,8 @@ export const refreshLogin = async (req: Request, res: Response) => {
             await newRefreshToken.save();
 
             // return new tokens to user
-            res.send(newTokens);
+            res.cookie("refreshToken", newTokens?.refreshToken);
+            res.cookie("accessToken", newTokens?.accessToken);
         }
     } catch (error) {
         if (error instanceof Error) {

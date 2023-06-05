@@ -117,7 +117,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.login = login;
 const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const refreshToken = req.body.refreshToken;
+        const refreshToken = req.cookies.refreshToken;
         const userEmail = req.authenticatedUser.email;
         // check if refresh token is provided and valid
         if (!refreshToken)
@@ -140,7 +140,8 @@ const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             // save new refresh token to DB
             yield newRefreshToken.save();
             // return new tokens to user
-            res.send(newTokens);
+            res.cookie("refreshToken", newTokens === null || newTokens === void 0 ? void 0 : newTokens.refreshToken);
+            res.cookie("accessToken", newTokens === null || newTokens === void 0 ? void 0 : newTokens.accessToken);
         }
     }
     catch (error) {

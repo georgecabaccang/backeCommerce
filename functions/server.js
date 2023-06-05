@@ -36,4 +36,3 @@ app.listen(8002, () => {
     console.log("Port 8002");
 });
 exports.default = app;
-// module.exports.handler = serverless(app);
