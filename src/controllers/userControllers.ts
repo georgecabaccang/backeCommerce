@@ -116,7 +116,7 @@ export const login = async (req: Request, res: Response) => {
 export const refreshLogin = async (req: Request, res: Response) => {
     try {
         const refreshToken = req.body.refreshToken;
-        const userEmail = req.body.email;
+        const userEmail = req.authenticatedUser.email;
         // check if refresh token is provided and valid
         if (!refreshToken) return res.send("no refresh token provided");
         const validRefreshToken = await RefreshToken.findOne({ refreshToken: refreshToken });

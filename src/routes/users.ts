@@ -16,7 +16,7 @@ userRoutes.patch("/:user_id/update-user-type", authToken, updateSellerStatus);
 userRoutes.patch("/:user_id/change-password", authToken, changePassword);
 userRoutes.post("/register", createUser);
 userRoutes.post("/login", login);
-userRoutes.post("/refreshlogin", refreshLogin);
+userRoutes.post("/refreshlogin", authToken, refreshLogin);
 userRoutes.post("/logout", logout);
 
 export default userRoutes;

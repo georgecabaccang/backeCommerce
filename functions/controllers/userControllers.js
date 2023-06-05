@@ -113,7 +113,7 @@ exports.login = login;
 const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.body.refreshToken;
-        const userEmail = req.body.email;
+        const userEmail = req.authenticatedUser.email;
         // check if refresh token is provided and valid
         if (!refreshToken)
             return res.send("no refresh token provided");
