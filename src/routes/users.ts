@@ -12,6 +12,7 @@ import { authToken } from "../security/authentication";
 const userRoutes = express.Router();
 
 userRoutes.get("/all-users");
+// userRoutes.get("/profile-details", authToken, getUserProfileDetails);
 userRoutes.patch("/:user_id/update-user-type", authToken, updateSellerStatus);
 userRoutes.patch("/:user_id/change-password", authToken, changePassword);
 userRoutes.post("/register", createUser);

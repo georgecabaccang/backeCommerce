@@ -188,6 +188,24 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.changePassword = changePassword;
+// export const getUserProfileDetails = async (req: Request, res: Response) => {
+//     try {
+//         const user_id = req.authenticatedUser.email;
+//         const user = await User.findById(user_id);
+//         if (user) {
+//             const userDetails = {
+//                 email: user.email,
+//                 _id: user._id,
+//                 isSeller: user.isSeller,
+//             };
+//             return res.send(user_id);
+//         }
+//     } catch (error) {
+//         if (error instanceof Error) {
+//             res.send(error.message);
+//         }
+//     }
+// };
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.body.refreshToken;
