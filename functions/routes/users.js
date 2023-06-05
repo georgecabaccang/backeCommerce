@@ -13,6 +13,6 @@ userRoutes.patch("/:user_id/update-user-type", authentication_1.authToken, userC
 userRoutes.patch("/:user_id/change-password", authentication_1.authToken, userControllers_1.changePassword);
 userRoutes.post("/register", userControllers_1.createUser);
 userRoutes.post("/login", userControllers_1.login);
-userRoutes.post("/refreshlogin", authentication_1.authToken, userControllers_1.refreshLogin);
+userRoutes.post("/refreshlogin", userControllers_1.refreshLogin);
 userRoutes.post("/logout", userControllers_1.logout);
 exports.default = userRoutes;
