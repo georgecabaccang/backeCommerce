@@ -68,12 +68,12 @@ export const createUser = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
     try {
         const userCredentials = req.body;
+
         // Find user with entered Email
         const user = await User.findOne({
             email: userCredentials.email,
         });
         if (!user) {
-            // return res.sendStatus(404);
             return res.sendStatus(404);
         }
 
@@ -103,9 +103,9 @@ export const login = async (req: Request, res: Response) => {
         });
         await refrehsToken.save();
 
-        // Send Access Token of user back
-        res.send({ tokens: tokens, userDetails: { ...userPayload, isSeller: user.isSeller } });
-        // res.send({ userPayload: userPayload });
+        // Send Access Token of user back as cookies
+        res.cookie("accessToken", tokens.accessToken, { httpOnly: true });
+        res.cookie("refreshToken", tokens.refreshToken, { httpOnly: true });
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);

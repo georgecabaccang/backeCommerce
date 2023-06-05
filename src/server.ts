@@ -11,6 +11,7 @@ import ordersRoutes from "./routes/orders";
 
 // import serverless from "serverless-http";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 
 const app = express();
 mongoose.connect(process.env.MONGO_DB as string);
@@ -22,10 +23,11 @@ db.on("error", (error: IDBTypes) => {
 db.once("open", () => {
     console.log("Connected to DB");
 });
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
-app.use(cors());
+app.use(cors({ credentials: true, origin: "http://localhost:8888" }));
 
 app.use("/user", userRoutes);
 app.use("/shop", productRoutes);

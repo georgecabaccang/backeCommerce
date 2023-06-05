@@ -75,7 +75,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             email: userCredentials.email,
         });
         if (!user) {
-            // return res.sendStatus(404);
             return res.sendStatus(404);
         }
         // Check if passwords match
@@ -99,9 +98,9 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             refreshToken: tokens === null || tokens === void 0 ? void 0 : tokens.refreshToken,
         });
         yield refrehsToken.save();
-        // Send Access Token of user back
-        res.send({ tokens: tokens, userDetails: Object.assign(Object.assign({}, userPayload), { isSeller: user.isSeller }) });
-        // res.send({ userPayload: userPayload });
+        // Send Access Token of user back as cookies
+        res.cookie("accessToken", tokens.accessToken, { httpOnly: true });
+        res.cookie("refreshToken", tokens.refreshToken, { httpOnly: true });
     }
     catch (error) {
         if (error instanceof Error) {
