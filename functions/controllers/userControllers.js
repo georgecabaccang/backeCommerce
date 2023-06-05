@@ -13,8 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
-const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
+require("dotenv").config();
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const crypto_js_1 = __importDefault(require("crypto-js"));
+const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const orderListModel_1 = __importDefault(require("../models/orderListModel"));
@@ -87,7 +89,10 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const userPayload = {
             email: user.email,
             _id: user._id,
+            isSeller: user.isSeller,
         };
+        // create encrypted payload to send to be saved in localstorage
+        const encUserDetails = crypto_js_1.default.AES.encrypt(JSON.stringify(userPayload), process.env.CRYPTO_HASHER).toString();
         // create jwt tokens from authentication.ts
         const tokens = (0, authentication_1.token)(userPayload);
         // check if tokens were created
@@ -101,6 +106,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         // Send Access Token of user back as cookies
         res.cookie("accessToken", tokens.accessToken, { httpOnly: true });
         res.cookie("refreshToken", tokens.refreshToken, { httpOnly: true });
+        return res.send(encUserDetails);
     }
     catch (error) {
         if (error instanceof Error) {

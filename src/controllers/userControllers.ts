@@ -1,7 +1,11 @@
+require("dotenv").config();
+
 import { Request, Response } from "express";
 
-import RefreshToken from "../models/refreshTokenModel";
 import bcrypt from "bcrypt";
+import CryptoJS from "crypto-js";
+
+import RefreshToken from "../models/refreshTokenModel";
 import User from "../models/userModel";
 import Cart from "../models/cartModel";
 import OrderList from "../models/orderListModel";
@@ -88,7 +92,14 @@ export const login = async (req: Request, res: Response) => {
         const userPayload = {
             email: user.email,
             _id: user._id,
+            isSeller: user.isSeller,
         };
+
+        // create encrypted payload to send to be saved in localstorage
+        const encUserDetails = CryptoJS.AES.encrypt(
+            JSON.stringify(userPayload),
+            process.env.CRYPTO_HASHER!
+        ).toString();
 
         // create jwt tokens from authentication.ts
         const tokens = token(userPayload);
@@ -106,6 +117,7 @@ export const login = async (req: Request, res: Response) => {
         // Send Access Token of user back as cookies
         res.cookie("accessToken", tokens.accessToken, { httpOnly: true });
         res.cookie("refreshToken", tokens.refreshToken, { httpOnly: true });
+        return res.send(encUserDetails);
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);
