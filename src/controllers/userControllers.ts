@@ -1,9 +1,8 @@
 require("dotenv").config();
 
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 import bcrypt from "bcrypt";
-import CryptoJS from "crypto-js";
 
 import RefreshToken from "../models/refreshTokenModel";
 import User from "../models/userModel";
@@ -69,7 +68,7 @@ export const createUser = async (req: Request, res: Response) => {
 };
 
 // Login User
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userCredentials = req.body;
 
@@ -84,8 +83,7 @@ export const login = async (req: Request, res: Response) => {
         // Check if passwords match
         const match = await bcrypt.compare(userCredentials.password, user.password);
         if (!match) {
-            res.send("wrong password");
-            return;
+            return res.send("wrong password");
         }
 
         // If everything is a-okay
@@ -94,12 +92,6 @@ export const login = async (req: Request, res: Response) => {
             _id: user._id,
             isSeller: user.isSeller,
         };
-
-        // create encrypted payload to send to be saved in localstorage
-        const encUserDetails = CryptoJS.AES.encrypt(
-            JSON.stringify(userPayload),
-            process.env.CRYPTO_HASHER!
-        ).toString();
 
         // create jwt tokens from authentication.ts
         const tokens = token(userPayload);
@@ -117,7 +109,12 @@ export const login = async (req: Request, res: Response) => {
         // Send Access Token of user back as cookies
         res.cookie("accessToken", tokens.accessToken, { httpOnly: true });
         res.cookie("refreshToken", tokens.refreshToken, { httpOnly: true });
-        return res.send(encUserDetails);
+        req.authenticatedUser = {
+            email: user.email,
+            _id: user._id.toString(),
+            isSeller: user.isSeller,
+        };
+        return next();
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);
@@ -125,7 +122,7 @@ export const login = async (req: Request, res: Response) => {
     }
 };
 
-export const refreshLogin = async (req: Request, res: Response) => {
+export const refreshLogin = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const refreshToken = req.cookies.refreshToken;
         const userEmail = req.authenticatedUser.email;
@@ -133,7 +130,7 @@ export const refreshLogin = async (req: Request, res: Response) => {
         // check if refresh token is provided and valid
         if (!refreshToken) return res.send("no refresh token provided");
         const validRefreshToken = await RefreshToken.findOne({ refreshToken: refreshToken });
-        if (!validRefreshToken) return res.send("refresh token not found");
+        if (!validRefreshToken) return res.send("tampered refresh token");
 
         // Generate new tokens
         const newTokens = refreshTokenFn(refreshToken, userEmail);
@@ -154,7 +151,7 @@ export const refreshLogin = async (req: Request, res: Response) => {
             // return new tokens to user
             res.cookie("refreshToken", newTokens?.refreshToken);
             res.cookie("accessToken", newTokens?.accessToken);
-            return res.send("OK");
+            return next();
         }
     } catch (error) {
         if (error instanceof Error) {
@@ -205,21 +202,17 @@ export const changePassword = async (req: Request, res: Response) => {
     }
 };
 
-export const getUserProfileDetails = async (req: Request, res: Response) => {
+export const getUserProfileDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user_id = req.authenticatedUser._id;
         const user = await User.findById(user_id);
         if (user) {
-            const userDetails = {
+            req.authenticatedUser = {
                 email: user.email,
-                _id: user._id,
+                _id: user._id.toString(),
                 isSeller: user.isSeller,
             };
-            const encUserDetails = CryptoJS.AES.encrypt(
-                JSON.stringify(userDetails),
-                process.env.CRYPTO_HASHER!
-            ).toString();
-            return res.send(encUserDetails);
+            return next();
         }
         return res.send("user not found");
     } catch (error) {

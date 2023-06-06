@@ -7,6 +7,7 @@ declare global {
             authenticatedUser: {
                 email: string;
                 _id: string;
+                isSeller?: boolean;
             };
         }
     }

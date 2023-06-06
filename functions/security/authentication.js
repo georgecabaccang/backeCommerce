@@ -8,8 +8,8 @@ require("dotenv").config();
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
-const ACCESSTOKEN_EXPIRE_TIME = "5m";
-const REFRESHTOKEN_EXPIRE_TIME = "8m";
+const ACCESSTOKEN_EXPIRE_TIME = "1d";
+const REFRESHTOKEN_EXPIRE_TIME = "15m";
 const token = (user) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
         const accessToken = jsonwebtoken_1.default.sign(user, ACCESS_TOKEN, { expiresIn: ACCESSTOKEN_EXPIRE_TIME });
@@ -56,7 +56,11 @@ const authToken = (req, res, next) => {
             // Check if use matches provided token
             if (email != userDetails.email)
                 return res.send("Payload User Mismatch");
-            req.authenticatedUser = { email: userDetails.email, _id: userDetails._id };
+            req.authenticatedUser = {
+                email: userDetails.email,
+                _id: userDetails._id,
+                isSeller: userDetails.isSeller,
+            };
             next();
         }
     }

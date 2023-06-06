@@ -69,7 +69,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.createUser = createUser;
 // Login User
-const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userCredentials = req.body;
         // Find user with entered Email
@@ -91,8 +91,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             _id: user._id,
             isSeller: user.isSeller,
         };
-        // create encrypted payload to send to be saved in localstorage
-        const encUserDetails = crypto_js_1.default.AES.encrypt(JSON.stringify(userPayload), process.env.CRYPTO_HASHER).toString();
         // create jwt tokens from authentication.ts
         const tokens = (0, authentication_1.token)(userPayload);
         // check if tokens were created
@@ -106,7 +104,12 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         // Send Access Token of user back as cookies
         res.cookie("accessToken", tokens.accessToken, { httpOnly: true });
         res.cookie("refreshToken", tokens.refreshToken, { httpOnly: true });
-        return res.send(encUserDetails);
+        req.authenticatedUser = {
+            email: user.email,
+            _id: user._id.toString(),
+            isSeller: user.isSeller,
+        };
+        next();
     }
     catch (error) {
         if (error instanceof Error) {
@@ -115,7 +118,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.login = login;
-const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const refreshLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.cookies.refreshToken;
         const userEmail = req.authenticatedUser.email;
@@ -142,7 +145,7 @@ const refreshLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             // return new tokens to user
             res.cookie("refreshToken", newTokens === null || newTokens === void 0 ? void 0 : newTokens.refreshToken);
             res.cookie("accessToken", newTokens === null || newTokens === void 0 ? void 0 : newTokens.accessToken);
-            return res.send("OK");
+            next();
         }
     }
     catch (error) {

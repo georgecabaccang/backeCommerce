@@ -6,8 +6,8 @@ import { Request, Response, NextFunction } from "express";
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
-const ACCESSTOKEN_EXPIRE_TIME = "5m";
-const REFRESHTOKEN_EXPIRE_TIME = "8m";
+const ACCESSTOKEN_EXPIRE_TIME = "1d";
+const REFRESHTOKEN_EXPIRE_TIME = "15m";
 
 export const token = (user: IUserModelForTokensAndPayload) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
@@ -57,7 +57,11 @@ export const authToken = (req: Request, res: Response, next: NextFunction) => {
             // Check if use matches provided token
             if (email != userDetails.email) return res.send("Payload User Mismatch");
 
-            req.authenticatedUser = { email: userDetails.email, _id: userDetails._id };
+            req.authenticatedUser = {
+                email: userDetails.email,
+                _id: userDetails._id,
+                isSeller: userDetails.isSeller,
+            };
             next();
         }
     } catch (error) {
