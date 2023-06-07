@@ -8,6 +8,7 @@ import RefreshToken from "../models/refreshTokenModel";
 import User from "../models/userModel";
 import Cart from "../models/cartModel";
 import OrderList from "../models/orderListModel";
+import CryptoJS from "crypto-js";
 
 import { IUserModel } from "../types/UserModel";
 import { ICartModel } from "../types/CartModel";
@@ -17,9 +18,12 @@ import { IOrderList } from "../types/OrderListModel";
 // Create User
 export const createUser = async (req: Request, res: Response) => {
     try {
-        const userDetails = req.body;
+        const hashedCredentials = req.body.hashedCredentials;
+        const decrypted = CryptoJS.AES.decrypt(hashedCredentials, process.env.CRYPTO_CRED_HASHER!);
+        const stringedCredentials = decrypted.toString(CryptoJS.enc.Utf8);
+        const decryptedCredentialsObject = JSON.parse(stringedCredentials);
 
-        const emailDuplication = await User.findOne({ email: userDetails.email });
+        const emailDuplication = await User.findOne({ email: decryptedCredentialsObject.email });
         if (emailDuplication) return res.sendStatus(409);
 
         // Create New Cart
@@ -37,9 +41,9 @@ export const createUser = async (req: Request, res: Response) => {
         const newUserOrders = await newOrders.save();
 
         // Create new User
-        const hashedPassword = await bcrypt.hash(userDetails.password, 10);
+        const hashedPassword = await bcrypt.hash(decryptedCredentialsObject.password, 10);
         const newUser = new User<IUserModel>({
-            email: userDetails.email,
+            email: decryptedCredentialsObject.email,
             password: hashedPassword,
             isSeller: false,
             userCart: null,
@@ -70,18 +74,21 @@ export const createUser = async (req: Request, res: Response) => {
 // Login User
 export const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const userCredentials = req.body;
+        const hashedCredentials = req.body.hashedCredentials;
+        const decrypted = CryptoJS.AES.decrypt(hashedCredentials, process.env.CRYPTO_CRED_HASHER!);
+        const stringedCredentials = decrypted.toString(CryptoJS.enc.Utf8);
+        const decryptedCredentialsObject = JSON.parse(stringedCredentials);
 
         // Find user with entered Email
         const user = await User.findOne({
-            email: userCredentials.email,
+            email: decryptedCredentialsObject.email,
         });
         if (!user) {
             return res.send("user not found");
         }
 
         // Check if passwords match
-        const match = await bcrypt.compare(userCredentials.password, user.password);
+        const match = await bcrypt.compare(decryptedCredentialsObject.password, user.password);
         if (!match) {
             return res.send("wrong password");
         }

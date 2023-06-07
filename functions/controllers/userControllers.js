@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.getUserProfileDetails = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
 require("dotenv").config();
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const crypto_js_1 = __importDefault(require("crypto-js"));
 const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
@@ -82,8 +81,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         // Check if passwords match
         const match = yield bcrypt_1.default.compare(userCredentials.password, user.password);
         if (!match) {
-            res.send("wrong password");
-            return;
+            return res.send("wrong password");
         }
         // If everything is a-okay
         const userPayload = {
@@ -109,7 +107,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
             _id: user._id.toString(),
             isSeller: user.isSeller,
         };
-        next();
+        return next();
     }
     catch (error) {
         if (error instanceof Error) {
@@ -127,7 +125,7 @@ const refreshLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             return res.send("no refresh token provided");
         const validRefreshToken = yield refreshTokenModel_1.default.findOne({ refreshToken: refreshToken });
         if (!validRefreshToken)
-            return res.send("refresh token not found");
+            return res.send("tampered refresh token");
         // Generate new tokens
         const newTokens = (0, authentication_1.refreshTokenFn)(refreshToken, userEmail);
         // check if newTokens return new tokens or string if user and refreshToken does not match
@@ -145,7 +143,7 @@ const refreshLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             // return new tokens to user
             res.cookie("refreshToken", newTokens === null || newTokens === void 0 ? void 0 : newTokens.refreshToken);
             res.cookie("accessToken", newTokens === null || newTokens === void 0 ? void 0 : newTokens.accessToken);
-            next();
+            return next();
         }
     }
     catch (error) {
@@ -198,18 +196,17 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.changePassword = changePassword;
-const getUserProfileDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserProfileDetails = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user_id = req.authenticatedUser._id;
         const user = yield userModel_1.default.findById(user_id);
         if (user) {
-            const userDetails = {
+            req.authenticatedUser = {
                 email: user.email,
-                _id: user._id,
+                _id: user._id.toString(),
                 isSeller: user.isSeller,
             };
-            const encUserDetails = crypto_js_1.default.AES.encrypt(JSON.stringify(userDetails), process.env.CRYPTO_HASHER).toString();
-            return res.send(encUserDetails);
+            return next();
         }
         return res.send("user not found");
     }
