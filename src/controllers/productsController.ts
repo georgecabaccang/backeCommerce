@@ -1,8 +1,7 @@
 import { Response, Request } from "express";
 import Product from "../models/productModel";
 import { IProductModel } from "../types/ProductModel";
-import Cart from "../models/cartModel";
-import { ICartModel } from "../types/CartModel";
+import User from "../models/userModel";
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
@@ -15,20 +14,28 @@ export const getProducts = async (req: Request, res: Response) => {
     }
 };
 
-export const addProducts = async (req: Request, res: Response) => {
+export const createProduct = async (req: Request, res: Response) => {
     try {
-        const product: IProductModel = req.body;
-        const newProduct = new Product({
-            productName: product.productName,
-            description: product.description,
-            price: product.price,
-            discount: product.discount,
-            stock: product.stock,
-            image: product.image,
-        });
+        const user_id = req.authenticatedUser._id;
+        const user = await User.findById(user_id);
+        if (user?.isSeller) {
+            const product: IProductModel = req.body.product;
+            const discountedPrice = product.price - product.price * (1 - product.discount);
+            const newProduct = new Product({
+                productName: product.productName,
+                description: product.description,
+                price: product.price,
+                discount: product.discount,
+                discountedPrice: discountedPrice,
+                stock: product.stock,
+                image: product.image,
+                postedBy: user_id,
+            });
 
-        await newProduct.save();
-        res.send(newProduct);
+            await newProduct.save();
+            return res.send("product created");
+        }
+        return res.send("user not seller");
     } catch (error) {
         if (error instanceof Error) {
             res.send({ message: error.message });

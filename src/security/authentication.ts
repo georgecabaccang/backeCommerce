@@ -60,7 +60,6 @@ export const authToken = (req: Request, res: Response, next: NextFunction) => {
             req.authenticatedUser = {
                 email: userDetails.email,
                 _id: userDetails._id,
-                isSeller: userDetails.isSeller,
             };
             next();
         }
