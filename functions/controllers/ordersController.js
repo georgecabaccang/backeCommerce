@@ -41,7 +41,7 @@ const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 }
             }
             yield userCart.save();
-            res.sendStatus(200);
+            res.send("OK");
         }
     }
     catch (error) {

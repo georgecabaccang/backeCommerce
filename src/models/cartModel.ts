@@ -1,14 +1,23 @@
 import { Schema, model } from "mongoose";
-import { ICartModel } from "../types/CartModel";
-import Item from "./itemModel";
 
-const cartSchema = new Schema<ICartModel>(
+const cartSchema = new Schema(
     {
-        items: [Item.schema],
+        items: [
+            {
+                prod_id: { type: Schema.Types.ObjectId, ref: "Product" },
+                image: String,
+                productName: String,
+                description: String,
+                price: Number,
+                discount: Number,
+                discountedPrice: Number,
+                quantity: Number,
+            },
+        ],
         cartOwner: { type: Schema.Types.ObjectId, ref: "User" },
     },
     { timestamps: true }
 );
 
-const Cart = model<ICartModel>("Cart", cartSchema);
+const Cart = model("Cart", cartSchema);
 export default Cart;

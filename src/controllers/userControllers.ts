@@ -11,7 +11,6 @@ import OrderList from "../models/orderListModel";
 import CryptoJS from "crypto-js";
 
 import { IUserModel } from "../types/UserModel";
-import { ICartModel } from "../types/CartModel";
 import { refreshTokenFn, token } from "../security/authentication";
 import { IOrderList } from "../types/OrderListModel";
 
@@ -27,7 +26,7 @@ export const createUser = async (req: Request, res: Response) => {
         if (emailDuplication) return res.sendStatus(409);
 
         // Create New Cart
-        const newCart = new Cart<ICartModel>({
+        const newCart = new Cart({
             items: [],
             cartOwner: null,
         });
@@ -209,25 +208,21 @@ export const changePassword = async (req: Request, res: Response) => {
     }
 };
 
-export const getUserProfileDetails = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const user_id = req.authenticatedUser._id;
-        const user = await User.findById(user_id);
-        if (user) {
-            req.authenticatedUser = {
-                email: user.email,
-                _id: user._id.toString(),
-                isSeller: user.isSeller,
-            };
-            return next();
-        }
-        return res.send("user not found");
-    } catch (error) {
-        if (error instanceof Error) {
-            res.send(error.message);
-        }
-    }
-};
+// export const getUserProfileDetails = async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const user_id = req.authenticatedUser._id;
+//         const user = await User.findById(user_id);
+//         if (user) {
+//             req.authenticatedUser.isSeller = user.isSeller;
+//             return next();
+//         }
+//         return res.send("user not found");
+//     } catch (error) {
+//         if (error instanceof Error) {
+//             res.send(error.message);
+//         }
+//     }
+// };
 
 export const logout = async (req: Request, res: Response) => {
     try {

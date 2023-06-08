@@ -12,19 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.getUserProfileDetails = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
+exports.logout = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
 require("dotenv").config();
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const orderListModel_1 = __importDefault(require("../models/orderListModel"));
+const crypto_js_1 = __importDefault(require("crypto-js"));
 const authentication_1 = require("../security/authentication");
 // Create User
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userDetails = req.body;
-        const emailDuplication = yield userModel_1.default.findOne({ email: userDetails.email });
+        const hashedCredentials = req.body.hashedCredentials;
+        const decrypted = crypto_js_1.default.AES.decrypt(hashedCredentials, process.env.CRYPTO_CRED_HASHER);
+        const stringedCredentials = decrypted.toString(crypto_js_1.default.enc.Utf8);
+        const decryptedCredentialsObject = JSON.parse(stringedCredentials);
+        const emailDuplication = yield userModel_1.default.findOne({ email: decryptedCredentialsObject.email });
         if (emailDuplication)
             return res.sendStatus(409);
         // Create New Cart
@@ -40,9 +44,9 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
         const newUserOrders = yield newOrders.save();
         // Create new User
-        const hashedPassword = yield bcrypt_1.default.hash(userDetails.password, 10);
+        const hashedPassword = yield bcrypt_1.default.hash(decryptedCredentialsObject.password, 10);
         const newUser = new userModel_1.default({
-            email: userDetails.email,
+            email: decryptedCredentialsObject.email,
             password: hashedPassword,
             isSeller: false,
             userCart: null,
@@ -70,16 +74,19 @@ exports.createUser = createUser;
 // Login User
 const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userCredentials = req.body;
+        const hashedCredentials = req.body.hashedCredentials;
+        const decrypted = crypto_js_1.default.AES.decrypt(hashedCredentials, process.env.CRYPTO_CRED_HASHER);
+        const stringedCredentials = decrypted.toString(crypto_js_1.default.enc.Utf8);
+        const decryptedCredentialsObject = JSON.parse(stringedCredentials);
         // Find user with entered Email
         const user = yield userModel_1.default.findOne({
-            email: userCredentials.email,
+            email: decryptedCredentialsObject.email,
         });
         if (!user) {
             return res.send("user not found");
         }
         // Check if passwords match
-        const match = yield bcrypt_1.default.compare(userCredentials.password, user.password);
+        const match = yield bcrypt_1.default.compare(decryptedCredentialsObject.password, user.password);
         if (!match) {
             return res.send("wrong password");
         }
@@ -196,27 +203,21 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.changePassword = changePassword;
-const getUserProfileDetails = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user_id = req.authenticatedUser._id;
-        const user = yield userModel_1.default.findById(user_id);
-        if (user) {
-            req.authenticatedUser = {
-                email: user.email,
-                _id: user._id.toString(),
-                isSeller: user.isSeller,
-            };
-            return next();
-        }
-        return res.send("user not found");
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            res.send(error.message);
-        }
-    }
-});
-exports.getUserProfileDetails = getUserProfileDetails;
+// export const getUserProfileDetails = async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const user_id = req.authenticatedUser._id;
+//         const user = await User.findById(user_id);
+//         if (user) {
+//             req.authenticatedUser.isSeller = user.isSeller;
+//             return next();
+//         }
+//         return res.send("user not found");
+//     } catch (error) {
+//         if (error instanceof Error) {
+//             res.send(error.message);
+//         }
+//     }
+// };
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const refreshToken = req.cookies.refreshToken;

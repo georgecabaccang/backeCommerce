@@ -30,7 +30,7 @@ export const placeOrder = async (req: Request, res: Response) => {
                 }
             }
             await userCart.save();
-            res.sendStatus(200);
+            res.send("OK");
         }
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);

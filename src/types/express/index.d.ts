@@ -9,6 +9,12 @@ declare global {
                 _id: string;
                 isSeller?: boolean;
             };
+            config: {
+                data: {
+                    email?: string;
+                    prod_id?: string;
+                };
+            };
         }
     }
 }

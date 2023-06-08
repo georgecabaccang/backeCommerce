@@ -9,7 +9,7 @@ const authentication_1 = require("../security/authentication");
 const createUserToken_1 = require("../middleware/createUserToken");
 const userRoutes = express_1.default.Router();
 userRoutes.get("/all-users");
-userRoutes.post("/profile-details", authentication_1.authToken, userControllers_1.getUserProfileDetails, createUserToken_1.createUserToken);
+userRoutes.post("/profile-details", authentication_1.authToken, createUserToken_1.createUserToken);
 userRoutes.patch("/:user_id/update-user-type", authentication_1.authToken, userControllers_1.updateSellerStatus);
 userRoutes.patch("/:user_id/change-password", authentication_1.authToken, userControllers_1.changePassword);
 userRoutes.post("/register", userControllers_1.createUser);

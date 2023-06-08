@@ -1,6 +1,5 @@
 import { Response, Request } from "express";
 import Product from "../models/productModel";
-import { IProductModel } from "../types/ProductModel";
 import User from "../models/userModel";
 
 export const getProducts = async (req: Request, res: Response) => {
@@ -19,7 +18,7 @@ export const createProduct = async (req: Request, res: Response) => {
         const user_id = req.authenticatedUser._id;
         const user = await User.findById(user_id);
         if (user?.isSeller) {
-            const product: IProductModel = req.body.product;
+            const product = req.body.product;
             const discountedPrice = product.price - product.price * (1 - product.discount);
             const newProduct = new Product({
                 productName: product.productName,
@@ -60,6 +59,21 @@ export const searchProducts = async (req: Request, res: Response) => {
         const query = req.body.query;
         const products = await Product.find({ productName: { $regex: query, $options: "i" } });
         res.send(products);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send({ message: error.message });
+        }
+    }
+};
+
+export const getUserProducts = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const userProducts = await Product.find({ postedBy: user_id });
+        if (userProducts.length != 0) {
+            return res.send(userProducts);
+        }
+        return res.send("no posted products");
     } catch (error) {
         if (error instanceof Error) {
             res.send({ message: error.message });
