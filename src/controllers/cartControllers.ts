@@ -132,7 +132,7 @@ export const getItemDetails = async (req: Request, res: Response) => {
                 return res.send(cart.items[indexOfItemInCart]);
             }
         }
-        return res.sendStatus(404);
+        return res.send("item not in cart");
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
     }

@@ -143,7 +143,7 @@ const getItemDetails = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 return res.send(cart.items[indexOfItemInCart]);
             }
         }
-        return res.sendStatus(404);
+        return res.send("item not in cart");
     }
     catch (error) {
         if (error instanceof Error)

@@ -1,5 +1,6 @@
 import { Response, Request } from "express";
 import Product from "../models/productModel";
+import { IProductModel } from "../types/ProductModel";
 import User from "../models/userModel";
 
 export const getProducts = async (req: Request, res: Response) => {
@@ -18,8 +19,8 @@ export const createProduct = async (req: Request, res: Response) => {
         const user_id = req.authenticatedUser._id;
         const user = await User.findById(user_id);
         if (user?.isSeller) {
-            const product = req.body.product;
-            const discountedPrice = product.price - product.price * (1 - product.discount);
+            const product: IProductModel = req.body.product;
+            const discountedPrice = product.price * (1 - product.discount);
             const newProduct = new Product({
                 productName: product.productName,
                 description: product.description,
