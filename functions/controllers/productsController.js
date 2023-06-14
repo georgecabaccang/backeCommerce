@@ -17,7 +17,7 @@ const productModel_1 = __importDefault(require("../models/productModel"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const product = yield productModel_1.default.find();
+        const product = yield productModel_1.default.find().where("stock").gt(0);
         res.send(product);
     }
     catch (error) {
@@ -72,7 +72,9 @@ exports.getProductDetails = getProductDetails;
 const searchProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const query = req.body.query;
-        const products = yield productModel_1.default.find({ productName: { $regex: query, $options: "i" } });
+        const products = yield productModel_1.default.find({ productName: { $regex: query, $options: "i" } })
+            .where("stock")
+            .gt(0);
         res.send(products);
     }
     catch (error) {

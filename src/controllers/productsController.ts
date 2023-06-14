@@ -5,7 +5,7 @@ import User from "../models/userModel";
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
-        const product = await Product.find();
+        const product = await Product.find().where("stock").gt(0);
         res.send(product);
     } catch (error) {
         if (error instanceof Error) {
@@ -58,7 +58,9 @@ export const getProductDetails = async (req: Request, res: Response) => {
 export const searchProducts = async (req: Request, res: Response) => {
     try {
         const query = req.body.query;
-        const products = await Product.find({ productName: { $regex: query, $options: "i" } });
+        const products = await Product.find({ productName: { $regex: query, $options: "i" } })
+            .where("stock")
+            .gt(0);
         res.send(products);
     } catch (error) {
         if (error instanceof Error) {
