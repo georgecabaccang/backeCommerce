@@ -2,6 +2,17 @@ import { NextFunction, Request, Response } from "express";
 import Cart from "../models/cartModel";
 import OrderList from "../models/orderListModel";
 import Product from "../models/productModel";
+import { ObjectId } from "mongodb";
+
+interface IItemDetails {
+    prod_id: string;
+    image: string;
+    productName: string;
+    price: number;
+    discount: number;
+    discountedPrice: number;
+    quantity: number;
+}
 
 export const placeOrder = async (req: Request, res: Response) => {
     try {
@@ -9,10 +20,35 @@ export const placeOrder = async (req: Request, res: Response) => {
         const userCart = await Cart.findOne({ cartOwner: user_id });
         const userOrders = await OrderList.findOne({ ordersOwner: user_id });
 
-        const items = req.body.toPurchase.items;
+        const items: Array<IItemDetails> = req.body.toPurchase.items;
         const totalAmountToPay = req.body.toPurchase.totalAmountToPay;
 
         if (userOrders && userCart) {
+            // Check if client side and database side prices match
+            let samePrices = true;
+            for (let i = 0; i < items.length; i++) {
+                const productInDB = await Product.findById(items[i].prod_id);
+                const itemInOrder = items[0];
+
+                if (productInDB) {
+                    const priceMatch = itemInOrder.price === productInDB.price;
+                    const discountMatch = itemInOrder.discount === productInDB.discount;
+                    const discountedPriceMatch =
+                        itemInOrder.discountedPrice === productInDB.discountedPrice;
+
+                    if (!priceMatch || !discountMatch || !discountedPriceMatch) {
+                        samePrices = false;
+                        break;
+                    }
+                } else {
+                    return res.send(`product with ID: ${items[i].prod_id} not found`);
+                }
+            }
+
+            if (!samePrices) {
+                return res.send("some items' prices don't match");
+            }
+
             const toBePushed = {
                 items: items,
                 totalAmount: totalAmountToPay,
@@ -22,7 +58,7 @@ export const placeOrder = async (req: Request, res: Response) => {
 
             for (const itemPurchased of items) {
                 const indexOfItemInCart = userCart.items.findIndex((item) => {
-                    return item.prod_id == itemPurchased.prod_id;
+                    return item.prod_id?.toString() == itemPurchased.prod_id;
                 });
                 if (indexOfItemInCart != -1) {
                     userCart.items.splice(indexOfItemInCart, 1);

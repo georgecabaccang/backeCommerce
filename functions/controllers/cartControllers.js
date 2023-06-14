@@ -87,7 +87,7 @@ const removeFromCart = (req, res) => __awaiter(void 0, void 0, void 0, function*
             const indexOfItemInCart = cart.items.findIndex((item) => {
                 return item.prod_id == prod_id;
             });
-            if (indexOfItemInCart != 1) {
+            if (indexOfItemInCart != -1) {
                 if (cart.items[indexOfItemInCart].quantity == 1) {
                     cart.items.splice(indexOfItemInCart, 1);
                 }

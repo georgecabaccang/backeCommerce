@@ -33,7 +33,7 @@ const createProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const user = yield userModel_1.default.findById(user_id);
         if (user === null || user === void 0 ? void 0 : user.isSeller) {
             const product = req.body.product;
-            const discountedPrice = product.price - product.price * (1 - product.discount);
+            const discountedPrice = product.price * (1 - product.discount);
             const newProduct = new productModel_1.default({
                 productName: product.productName,
                 description: product.description,
