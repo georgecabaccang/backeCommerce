@@ -26,6 +26,7 @@ const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (userOrders && userCart) {
             // Check if client side and database side prices match
             let samePrices = true;
+            let outOfStockProduct = "";
             for (let i = 0; i < items.length; i++) {
                 const productInDB = yield productModel_1.default.findById(items[i].prod_id);
                 const itemInOrder = items[0];
@@ -33,6 +34,11 @@ const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                     const priceMatch = itemInOrder.price === productInDB.price;
                     const discountMatch = itemInOrder.discount === productInDB.discount;
                     const discountedPriceMatch = itemInOrder.discountedPrice === productInDB.discountedPrice;
+                    const inStock = productInDB.stock != 0;
+                    if (!inStock) {
+                        outOfStockProduct = itemInOrder.productName;
+                        break;
+                    }
                     if (!priceMatch || !discountMatch || !discountedPriceMatch) {
                         samePrices = false;
                         break;
@@ -41,6 +47,9 @@ const placeOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 else {
                     return res.send(`product with ID: ${items[i].prod_id} not found`);
                 }
+            }
+            if (outOfStockProduct) {
+                return res.send(`${outOfStockProduct} is out of stock`);
             }
             if (!samePrices) {
                 return res.send("some items' prices don't match");
