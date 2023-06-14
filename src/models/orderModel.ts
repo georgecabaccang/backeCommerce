@@ -6,11 +6,12 @@ const orderSchema = new Schema<IOrder>(
         items: [
             {
                 prod_id: String,
+                image: String,
                 productName: String,
-                quantity: Number,
                 price: Number,
                 discount: Number,
-                image: String,
+                discountedPrice: Number,
+                quantity: Number,
             },
         ],
         totalAmount: { type: Number, required: true },

@@ -3,11 +3,12 @@ import { Types } from "mongoose";
 export interface IOrder {
     items: Array<{
         prod_id: string;
+        image: string;
         productName: string;
-        quantity: number;
         price: number;
         discount: number;
-        image: string;
+        discountedPrice: number;
+        quantity: number;
     }>;
     totalAmount: number;
     status?: string;

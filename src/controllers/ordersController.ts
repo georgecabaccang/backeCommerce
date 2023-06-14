@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import Cart from "../models/cartModel";
 import OrderList from "../models/orderListModel";
+import Product from "../models/productModel";
 
 export const placeOrder = async (req: Request, res: Response) => {
     try {
@@ -53,12 +54,12 @@ export const cancelOrder = async (req: Request, res: Response) => {
         const orderList = await OrderList.findOne({ ordersOwner: user_id });
 
         if (orderList) {
-            const indexOfOrder = orderList.orders.findIndex((order) => {
+            const indexOfOrderInOrders = orderList.orders.findIndex((order) => {
                 return order._id == req.body.order_id;
             });
 
-            if (indexOfOrder != -1) {
-                orderList.orders[indexOfOrder].status = "cancelled";
+            if (indexOfOrderInOrders != -1) {
+                orderList.orders[indexOfOrderInOrders].status = "cancelled";
                 await orderList.save();
                 return res.sendStatus(200);
             }
@@ -80,11 +81,42 @@ export const updateOrderStatusToReceived = async (req: Request, res: Response) =
                 return order._id == req.body.order_id;
             });
             if (indexOfOrderInOrders != -1) {
+                const orderItems = orderList.orders[indexOfOrderInOrders].items;
+                for (let i = 0; i < orderItems.length; i++) {
+                    const product = await Product.findById(orderItems[i].prod_id);
+                    if (product) {
+                        product.salesCount! += orderItems[i].quantity;
+                        product.stock! -= orderItems[i].quantity;
+                        await product.save();
+                    }
+                }
                 orderList.orders[indexOfOrderInOrders].status = "received";
                 await orderList.save();
                 return res.sendStatus(200);
             }
             return res.sendStatus(404);
+        }
+        return res.sendStatus(404);
+    } catch (error) {
+        if (error instanceof Error) return res.send(error.message);
+    }
+};
+
+export const getOrderDetails = async (req: Request, res: Response) => {
+    try {
+        const order_id = req.params.order_id;
+        const user_id = req.authenticatedUser._id;
+        const orderList = await OrderList.findOne({ ordersOwner: user_id });
+
+        if (orderList) {
+            const orderIndex = orderList.orders.findIndex((order) => {
+                return order._id == order_id;
+            });
+            if (orderIndex != -1) {
+                const orderDetails = orderList.orders[orderIndex];
+                return res.send(orderDetails);
+            }
+            return res.send("order not found");
         }
         return res.sendStatus(404);
     } catch (error) {
