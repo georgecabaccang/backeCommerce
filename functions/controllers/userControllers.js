@@ -21,6 +21,7 @@ const cartModel_1 = __importDefault(require("../models/cartModel"));
 const orderListModel_1 = __importDefault(require("../models/orderListModel"));
 const crypto_js_1 = __importDefault(require("crypto-js"));
 const authentication_1 = require("../security/authentication");
+const productModel_1 = __importDefault(require("../models/productModel"));
 // Create User
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -165,6 +166,9 @@ const updateSellerStatus = (req, res) => __awaiter(void 0, void 0, void 0, funct
         const user_id = req.params.user_id;
         const user = yield userModel_1.default.findById(user_id);
         if (user) {
+            if (user.isSeller == true) {
+                yield productModel_1.default.deleteMany({ postedBy: user_id });
+            }
             user.isSeller = !user.isSeller;
             yield user.save();
             return res.send("OK");

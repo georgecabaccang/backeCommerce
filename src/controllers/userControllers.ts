@@ -13,6 +13,7 @@ import CryptoJS from "crypto-js";
 import { IUserModel } from "../types/UserModel";
 import { refreshTokenFn, token } from "../security/authentication";
 import { IOrderList } from "../types/OrderListModel";
+import Product from "../models/productModel";
 
 // Create User
 export const createUser = async (req: Request, res: Response) => {
@@ -171,6 +172,9 @@ export const updateSellerStatus = async (req: Request, res: Response) => {
         const user_id = req.params.user_id;
         const user = await User.findById(user_id);
         if (user) {
+            if (user.isSeller == true) {
+                await Product.deleteMany({ postedBy: user_id });
+            }
             user.isSeller = !user.isSeller;
             await user.save();
             return res.send("OK");
