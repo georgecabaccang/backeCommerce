@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserProducts = exports.searchProducts = exports.getProductDetails = exports.createProduct = exports.getProducts = void 0;
+exports.getUserProducts = exports.searchProducts = exports.getProductDetails = exports.deleteProduct = exports.updateProductDetails = exports.createProduct = exports.getProducts = void 0;
 const productModel_1 = __importDefault(require("../models/productModel"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const getProducts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -56,6 +56,59 @@ const createProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.createProduct = createProduct;
+const updateProductDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const user_id = req.authenticatedUser._id;
+        const prod_id = req.body.updatedProductDetails.prod_id;
+        const updatedProductDetails = req.body.updatedProductDetails;
+        const productToBeUpdated = yield productModel_1.default.findById(prod_id);
+        if (productToBeUpdated) {
+            if (((_a = productToBeUpdated.postedBy) === null || _a === void 0 ? void 0 : _a.toString()) == user_id) {
+                productToBeUpdated.image = updatedProductDetails.image;
+                productToBeUpdated.productName = updatedProductDetails.productName;
+                productToBeUpdated.description = updatedProductDetails.description;
+                productToBeUpdated.price = updatedProductDetails.price;
+                productToBeUpdated.discount = updatedProductDetails.discount;
+                productToBeUpdated.discountedPrice =
+                    updatedProductDetails.price * (1 - updatedProductDetails.discount);
+                productToBeUpdated.stock = updatedProductDetails.stock;
+                yield productToBeUpdated.save();
+                return res.send(productToBeUpdated);
+            }
+            return res.send("you're not the poster of this product");
+        }
+        return res.send("product not found");
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send({ message: error.message });
+        }
+    }
+});
+exports.updateProductDetails = updateProductDetails;
+const deleteProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    try {
+        const user_id = req.authenticatedUser._id;
+        const prod_id = req.params.prod_id;
+        const productToBeDeleted = yield productModel_1.default.findById(prod_id);
+        if (productToBeDeleted) {
+            if (((_b = productToBeDeleted.postedBy) === null || _b === void 0 ? void 0 : _b.toString()) == user_id) {
+                yield productModel_1.default.deleteOne({ _id: prod_id });
+                return res.sendStatus(200);
+            }
+            return res.sendStatus(403);
+        }
+        return res.sendStatus(404);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send({ message: error.message });
+        }
+    }
+});
+exports.deleteProduct = deleteProduct;
 const getProductDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const prod_id = req.params._id;

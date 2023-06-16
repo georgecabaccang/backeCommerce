@@ -12,4 +12,6 @@ productRoutes.get("/product/:_id", productsController_1.getProductDetails);
 productRoutes.post("/add-product", authentication_1.authToken, productsController_1.createProduct);
 productRoutes.post("/my-products", authentication_1.authToken, productsController_1.getUserProducts);
 productRoutes.post("/search-products", productsController_1.searchProducts);
+productRoutes.patch("/update-my-product", authentication_1.authToken, productsController_1.updateProductDetails);
+productRoutes.post("/:prod_id/delete", authentication_1.authToken, productsController_1.deleteProduct);
 exports.default = productRoutes;

@@ -43,6 +43,57 @@ export const createProduct = async (req: Request, res: Response) => {
     }
 };
 
+export const updateProductDetails = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const prod_id = req.body.updatedProductDetails.prod_id;
+        const updatedProductDetails = req.body.updatedProductDetails;
+        const productToBeUpdated = await Product.findById(prod_id);
+        if (productToBeUpdated) {
+            if (productToBeUpdated.postedBy?.toString() == user_id) {
+                productToBeUpdated.image = updatedProductDetails.image;
+                productToBeUpdated.productName = updatedProductDetails.productName;
+                productToBeUpdated.description = updatedProductDetails.description;
+                productToBeUpdated.price = updatedProductDetails.price;
+                productToBeUpdated.discount = updatedProductDetails.discount;
+                productToBeUpdated.discountedPrice =
+                    updatedProductDetails.price * (1 - updatedProductDetails.discount);
+                productToBeUpdated.stock = updatedProductDetails.stock;
+
+                await productToBeUpdated.save();
+                return res.send(productToBeUpdated);
+            }
+            return res.send("you're not the poster of this product");
+        }
+        return res.send("product not found");
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send({ message: error.message });
+        }
+    }
+};
+
+export const deleteProduct = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const prod_id = req.params.prod_id;
+        const productToBeDeleted = await Product.findById(prod_id);
+
+        if (productToBeDeleted) {
+            if (productToBeDeleted.postedBy?.toString() == user_id) {
+                await Product.deleteOne({ _id: prod_id });
+                return res.sendStatus(200);
+            }
+            return res.sendStatus(403);
+        }
+        return res.sendStatus(404);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send({ message: error.message });
+        }
+    }
+};
+
 export const getProductDetails = async (req: Request, res: Response) => {
     try {
         const prod_id = req.params._id;
