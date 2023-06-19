@@ -247,3 +247,15 @@ export const logout = async (req: Request, res: Response) => {
         }
     }
 };
+
+export const deleteUser = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const deleteCount = await User.deleteOne({ _id: user_id });
+        return res.send(deleteCount);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+};

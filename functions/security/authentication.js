@@ -18,8 +18,8 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
-const ACCESSTOKEN_EXPIRE_TIME = "1d";
-const REFRESHTOKEN_EXPIRE_TIME = "15m";
+const ACCESSTOKEN_EXPIRE_TIME = "30m";
+const REFRESHTOKEN_EXPIRE_TIME = "1h";
 const token = (user) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
         const accessToken = jsonwebtoken_1.default.sign(user, ACCESS_TOKEN, { expiresIn: ACCESSTOKEN_EXPIRE_TIME });

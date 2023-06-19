@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
+exports.deleteUser = exports.logout = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
 require("dotenv").config();
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const refreshTokenModel_1 = __importDefault(require("../models/refreshTokenModel"));
@@ -243,3 +243,16 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.logout = logout;
+const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user_id = req.authenticatedUser._id;
+        const deleteCount = yield userModel_1.default.deleteOne({ _id: user_id });
+        return res.send(deleteCount);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+});
+exports.deleteUser = deleteUser;

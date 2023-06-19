@@ -2,7 +2,7 @@ import express from "express";
 import {
     changePassword,
     createUser,
-    // getUserProfileDetails,
+    deleteUser,
     login,
     logout,
     refreshLogin,
@@ -21,5 +21,6 @@ userRoutes.post("/register", createUser);
 userRoutes.post("/login", login, createUserToken);
 userRoutes.post("/refreshlogin", authToken, refreshLogin, createUserToken);
 userRoutes.delete("/logout", logout);
+userRoutes.post("/delete-account", authToken, deleteUser);
 
 export default userRoutes;

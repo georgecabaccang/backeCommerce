@@ -16,4 +16,5 @@ userRoutes.post("/register", userControllers_1.createUser);
 userRoutes.post("/login", userControllers_1.login, createUserToken_1.createUserToken);
 userRoutes.post("/refreshlogin", authentication_1.authToken, userControllers_1.refreshLogin, createUserToken_1.createUserToken);
 userRoutes.delete("/logout", userControllers_1.logout);
+userRoutes.post("/delete-account", authentication_1.authToken, userControllers_1.deleteUser);
 exports.default = userRoutes;

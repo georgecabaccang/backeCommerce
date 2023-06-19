@@ -7,8 +7,8 @@ import User from "../models/userModel";
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
-const ACCESSTOKEN_EXPIRE_TIME = "1d";
-const REFRESHTOKEN_EXPIRE_TIME = "15m";
+const ACCESSTOKEN_EXPIRE_TIME = "30m";
+const REFRESHTOKEN_EXPIRE_TIME = "1h";
 
 export const token = (user: IUserModelForTokensAndPayload) => {
     if (ACCESS_TOKEN && REFRESH_TOKEN) {
