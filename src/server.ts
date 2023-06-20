@@ -26,7 +26,7 @@ db.once("open", () => {
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
-app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+app.use(cors({ credentials: true, origin: "https://fronte-commerce.vercel.app" }));
 
 app.use("/user", userRoutes);
 app.use("/shop", productRoutes);
