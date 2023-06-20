@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authToken = exports.refreshTokenFn = exports.token = void 0;
+exports.verifyPasswordToken = exports.resetPasswordToken = exports.authToken = exports.refreshTokenFn = exports.token = void 0;
 require("dotenv").config();
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+const FORGOT_PASSWORD_HASHER = process.env.FORGOT_PASSWORD_HASHER;
 const ACCESSTOKEN_EXPIRE_TIME = "30m";
 const REFRESHTOKEN_EXPIRE_TIME = "1h";
 const token = (user) => {
@@ -87,3 +88,20 @@ const authToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.authToken = authToken;
+const resetPasswordToken = (completedString, idLength) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log();
+    if (FORGOT_PASSWORD_HASHER) {
+        const token = jsonwebtoken_1.default.sign({ completedString: completedString, idLength: idLength }, FORGOT_PASSWORD_HASHER, {
+            expiresIn: "1d",
+        });
+        return token;
+    }
+});
+exports.resetPasswordToken = resetPasswordToken;
+const verifyPasswordToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
+    if (FORGOT_PASSWORD_HASHER) {
+        const payload = jsonwebtoken_1.default.verify(token, FORGOT_PASSWORD_HASHER);
+        return payload;
+    }
+});
+exports.verifyPasswordToken = verifyPasswordToken;

@@ -6,6 +6,7 @@ import User from "../models/userModel";
 
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+const FORGOT_PASSWORD_HASHER = process.env.FORGOT_PASSWORD_HASHER;
 
 const ACCESSTOKEN_EXPIRE_TIME = "30m";
 const REFRESHTOKEN_EXPIRE_TIME = "1h";
@@ -74,5 +75,26 @@ export const authToken = async (req: Request, res: Response, next: NextFunction)
         }
     } catch (error) {
         if (error instanceof Error) return res.send(error.message);
+    }
+};
+
+export const resetPasswordToken = async (completedString: string, idLength: number) => {
+    console.log();
+    if (FORGOT_PASSWORD_HASHER) {
+        const token = jwt.sign(
+            { completedString: completedString, idLength: idLength },
+            FORGOT_PASSWORD_HASHER,
+            {
+                expiresIn: "1d",
+            }
+        );
+        return token;
+    }
+};
+
+export const verifyPasswordToken = async (token: string) => {
+    if (FORGOT_PASSWORD_HASHER) {
+        const payload = jwt.verify(token, FORGOT_PASSWORD_HASHER);
+        return payload;
     }
 };

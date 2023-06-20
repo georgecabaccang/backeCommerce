@@ -3,6 +3,7 @@ require("dotenv").config();
 import { NextFunction, Request, Response } from "express";
 
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 import RefreshToken from "../models/refreshTokenModel";
 import User from "../models/userModel";
@@ -11,9 +12,16 @@ import OrderList from "../models/orderListModel";
 import CryptoJS from "crypto-js";
 
 import { IUserModel } from "../types/UserModel";
-import { refreshTokenFn, token } from "../security/authentication";
+import {
+    refreshTokenFn,
+    resetPasswordToken,
+    token,
+    verifyPasswordToken,
+} from "../security/authentication";
 import { IOrderList } from "../types/OrderListModel";
 import Product from "../models/productModel";
+import ResetPasswordToken from "../models/resetPasswordModel";
+import { JwtPayload } from "jsonwebtoken";
 
 // Create User
 export const createUser = async (req: Request, res: Response) => {
@@ -41,10 +49,10 @@ export const createUser = async (req: Request, res: Response) => {
         const newUserOrders = await newOrders.save();
 
         // Create new User
-        const hashedPassword = await bcrypt.hash(decryptedCredentialsObject.password, 10);
+        const encryptedPassword = await bcrypt.hash(decryptedCredentialsObject.password, 10);
         const newUser = new User<IUserModel>({
             email: decryptedCredentialsObject.email,
-            password: hashedPassword,
+            password: encryptedPassword,
             isSeller: false,
             userCart: null,
             userOrders: null,
@@ -253,6 +261,131 @@ export const deleteUser = async (req: Request, res: Response) => {
         const user_id = req.authenticatedUser._id;
         const deleteCount = await User.deleteOne({ _id: user_id });
         return res.send(deleteCount);
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+};
+
+// FORGOT PASSWORD SECTION ---------------------------------------
+
+const ID_SPLICE = +process.env.ID_SPLICE!;
+const STRING_SPLICE = +process.env.STRING_SPLICE!;
+const COMBO_SPLICE = +process.env.COMBO_SPLICE!;
+
+const MAHANT = process.env.MAHANT!;
+const YEHER = process.env.YEHER!;
+
+export const createForgotPasswordToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const email = req.body.email;
+        const user = await User.findOne({ email: email });
+
+        if (user) {
+            const randString = crypto.randomBytes(69).toString("hex").split("");
+            const stringToDB = randString.join("");
+            const user_id = user._id.toString().split("");
+            user_id.splice(ID_SPLICE, 0, MAHANT);
+            randString.splice(STRING_SPLICE, 0, YEHER);
+            randString.splice(COMBO_SPLICE, 0, ...user_id);
+            const completedString = randString.join("");
+
+            const token = await resetPasswordToken(completedString, user_id.length + MAHANT.length);
+
+            const hashedDetails = encodeURIComponent(
+                CryptoJS.AES.encrypt(
+                    JSON.stringify({ resetToken: token }),
+                    process.env.CRYPTO_PRE_HASHER!
+                ).toString()
+            );
+
+            const newResetPasswordToken = new ResetPasswordToken({
+                resetToken: stringToDB,
+            });
+            await newResetPasswordToken.save();
+            req.resetToken = hashedDetails;
+            req.authenticatedUser = { email: user.email, _id: user._id.toString() };
+            return next();
+        }
+        return res.status(404).send("user not found");
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+};
+
+export const setNewPassword = async (req: Request, res: Response) => {
+    try {
+        const user_id = req.params.user_id;
+        const resetPasswordToken = req.params.resetPasswordToken;
+        const hashedNewPassword = req.body.data.newPassword;
+
+        if (resetPasswordToken) {
+            const decrypted = CryptoJS.AES.decrypt(
+                resetPasswordToken,
+                process.env.CRYPTO_PRE_HASHER!
+            );
+            const stringedToken = decrypted.toString(CryptoJS.enc.Utf8);
+            const decryptedTokenObject = JSON.parse(stringedToken);
+
+            const payload = (await verifyPasswordToken(
+                decryptedTokenObject.resetToken
+            )) as JwtPayload;
+
+            if (payload) {
+                const idLength = payload.idLength;
+                const completedStringArrayForm = payload.completedString.split("");
+
+                const dirtyUser_id = completedStringArrayForm.splice(
+                    COMBO_SPLICE + 1,
+                    idLength - 1
+                );
+                const cleanedUser_id = dirtyUser_id.join("").replace(MAHANT, "");
+
+                completedStringArrayForm.splice(STRING_SPLICE, YEHER.length);
+                const cleanedCompletedString = completedStringArrayForm.join("");
+
+                if (user_id === cleanedUser_id) {
+                    const tokenInDB = await ResetPasswordToken.findOne({
+                        resetToken: cleanedCompletedString,
+                    });
+                    if (tokenInDB) {
+                        const user = await User.findById(user_id);
+                        if (user) {
+                            const decrypted = CryptoJS.AES.decrypt(
+                                hashedNewPassword,
+                                process.env.CRYPTO_PASSWORD_HASHER!
+                            );
+                            const stringedNewPassword = decrypted.toString(CryptoJS.enc.Utf8);
+                            const decryptedNewPassword = JSON.parse(stringedNewPassword);
+
+                            const encryptedNewPassword = await bcrypt.hash(
+                                decryptedNewPassword,
+                                10
+                            );
+                            user.password = encryptedNewPassword;
+                            await user.save();
+
+                            await ResetPasswordToken.deleteOne({
+                                resetToken: cleanedCompletedString,
+                            });
+
+                            return res.status(204).send("new password set");
+                        }
+                        return res.status(404).send("user not found");
+                    }
+                    return res.status(498).send("expired token");
+                }
+                return res.status(401).send("IDs don't match");
+            }
+            return res.status(404).send("no reset token");
+        }
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);
