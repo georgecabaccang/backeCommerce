@@ -110,8 +110,16 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         });
         yield refrehsToken.save();
         // Send Access Token of user back as cookies
-        res.cookie("accessToken", tokens.accessToken, { httpOnly: true });
-        res.cookie("refreshToken", tokens.refreshToken, { httpOnly: true });
+        res.cookie("accessToken", tokens.accessToken, {
+            httpOnly: true,
+            sameSite: "none",
+            secure: true,
+        });
+        res.cookie("refreshToken", tokens.refreshToken, {
+            httpOnly: true,
+            sameSite: "none",
+            secure: true,
+        });
         req.authenticatedUser = {
             email: user.email,
             _id: user._id.toString(),
