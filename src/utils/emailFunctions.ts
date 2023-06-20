@@ -22,7 +22,7 @@ export const sendResetLink = async (req: Request, res: Response) => {
         from: MY_EMAIL,
         to: toSendToEmail,
         subject: "Reset Password Link",
-        html: `<p>Here's the reset password <a href="http://localhost:5173/reset-password/${user_id}/${resetToken}">Link</a>. This will expire in 5 minutes.</p>`,
+        html: `<p>Here's the reset password <a href="https://fronte-commerce.vercel.app/reset-password/${user_id}/${resetToken}">Link</a>. This will expire in 5 minutes.</p>`,
     };
 
     transporter.sendMail(options, (error, info) => {
@@ -31,6 +31,6 @@ export const sendResetLink = async (req: Request, res: Response) => {
         }
         return res
             .status(200)
-            .send(`http://localhost:5173/reset-password/${user_id}/${resetToken}`);
+            .send(`https://fronte-commerce.vercel.app/reset-password/${user_id}/${resetToken}`);
     });
 };
