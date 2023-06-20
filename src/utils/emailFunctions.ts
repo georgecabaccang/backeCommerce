@@ -14,16 +14,15 @@ export const sendResetLink = async (req: Request, res: Response) => {
         secure: true,
         auth: {
             user: MY_EMAIL,
-            // make env for pass
-            pass: "khifokwnpdcfbzcw",
+            pass: process.env.EMAIL_PASS,
         },
     });
 
     const options = {
         from: MY_EMAIL,
         to: toSendToEmail,
-        subject: "Test Token",
-        html: `http://localhost:5173/reset-password/${user_id}/${resetToken}`,
+        subject: "Reset Password Link",
+        html: `<p>Here's the reset password <a href="http://localhost:5173/reset-password/${user_id}/${resetToken}">Link</a>. This will expire in 5 minutes.</p>`,
     };
 
     transporter.sendMail(options, (error, info) => {

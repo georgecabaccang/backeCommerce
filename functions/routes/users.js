@@ -20,4 +20,5 @@ userRoutes.delete("/logout", userControllers_1.logout);
 userRoutes.post("/delete-account", authentication_1.authToken, userControllers_1.deleteUser);
 userRoutes.post("/reset-password", userControllers_1.createForgotPasswordToken, emailFunctions_1.sendResetLink);
 userRoutes.patch("/:user_id/set-new-password/:resetPasswordToken", userControllers_1.setNewPassword);
+userRoutes.get("/reset-token-check/:resetPasswordToken", userControllers_1.checkIfLinkHasExpired);
 exports.default = userRoutes;

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setNewPassword = exports.createForgotPasswordToken = exports.deleteUser = exports.logout = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
+exports.checkIfLinkHasExpired = exports.setNewPassword = exports.createForgotPasswordToken = exports.deleteUser = exports.logout = exports.changePassword = exports.updateSellerStatus = exports.refreshLogin = exports.login = exports.createUser = void 0;
 require("dotenv").config();
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const crypto_1 = __importDefault(require("crypto"));
@@ -286,7 +286,7 @@ const createForgotPasswordToken = (req, res, next) => __awaiter(void 0, void 0, 
             req.authenticatedUser = { email: user.email, _id: user._id.toString() };
             return next();
         }
-        return res.status(404).send("user not found");
+        return res.send("user not found");
     }
     catch (error) {
         if (error instanceof Error) {
@@ -336,8 +336,8 @@ const setNewPassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 }
                 return res.status(401).send("IDs don't match");
             }
-            return res.status(404).send("no reset token");
         }
+        return res.status(404).send("no reset token");
     }
     catch (error) {
         if (error instanceof Error) {
@@ -346,3 +346,24 @@ const setNewPassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.setNewPassword = setNewPassword;
+const checkIfLinkHasExpired = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const resetPasswordToken = req.params.resetPasswordToken;
+        const decrypted = crypto_js_1.default.AES.decrypt(resetPasswordToken, process.env.CRYPTO_PRE_HASHER);
+        const stringedToken = decrypted.toString(crypto_js_1.default.enc.Utf8);
+        const decryptedTokenObject = JSON.parse(stringedToken);
+        const payload = (yield (0, authentication_1.verifyPasswordToken)(decryptedTokenObject.resetToken));
+        if (payload.exp) {
+            if (payload.exp <= Date.now()) {
+                return res.status(498).send("jwt expired");
+            }
+        }
+        return res.status(200);
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+});
+exports.checkIfLinkHasExpired = checkIfLinkHasExpired;

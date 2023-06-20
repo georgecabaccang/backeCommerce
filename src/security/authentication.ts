@@ -85,7 +85,7 @@ export const resetPasswordToken = async (completedString: string, idLength: numb
             { completedString: completedString, idLength: idLength },
             FORGOT_PASSWORD_HASHER,
             {
-                expiresIn: "1d",
+                expiresIn: "5m",
             }
         );
         return token;

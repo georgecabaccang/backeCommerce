@@ -92,7 +92,7 @@ const resetPasswordToken = (completedString, idLength) => __awaiter(void 0, void
     console.log();
     if (FORGOT_PASSWORD_HASHER) {
         const token = jsonwebtoken_1.default.sign({ completedString: completedString, idLength: idLength }, FORGOT_PASSWORD_HASHER, {
-            expiresIn: "1d",
+            expiresIn: "5m",
         });
         return token;
     }

@@ -1,6 +1,7 @@
 import express from "express";
 import {
     changePassword,
+    checkIfLinkHasExpired,
     createForgotPasswordToken,
     createUser,
     deleteUser,
@@ -10,7 +11,7 @@ import {
     setNewPassword,
     updateSellerStatus,
 } from "../controllers/userControllers";
-import { authToken } from "../security/authentication";
+import { authToken, verifyPasswordToken } from "../security/authentication";
 import { createUserToken } from "../middleware/createUserToken";
 import { sendResetLink } from "../utils/emailFunctions";
 
@@ -27,5 +28,6 @@ userRoutes.delete("/logout", logout);
 userRoutes.post("/delete-account", authToken, deleteUser);
 userRoutes.post("/reset-password", createForgotPasswordToken, sendResetLink);
 userRoutes.patch("/:user_id/set-new-password/:resetPasswordToken", setNewPassword);
+userRoutes.get("/reset-token-check/:resetPasswordToken", checkIfLinkHasExpired);
 
 export default userRoutes;

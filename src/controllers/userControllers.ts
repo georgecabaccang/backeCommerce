@@ -312,7 +312,7 @@ export const createForgotPasswordToken = async (
             req.authenticatedUser = { email: user.email, _id: user._id.toString() };
             return next();
         }
-        return res.status(404).send("user not found");
+        return res.send("user not found");
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);
@@ -384,8 +384,30 @@ export const setNewPassword = async (req: Request, res: Response) => {
                 }
                 return res.status(401).send("IDs don't match");
             }
-            return res.status(404).send("no reset token");
         }
+        return res.status(404).send("no reset token");
+    } catch (error) {
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+    }
+};
+
+export const checkIfLinkHasExpired = async (req: Request, res: Response) => {
+    try {
+        const resetPasswordToken = req.params.resetPasswordToken;
+        const decrypted = CryptoJS.AES.decrypt(resetPasswordToken, process.env.CRYPTO_PRE_HASHER!);
+        const stringedToken = decrypted.toString(CryptoJS.enc.Utf8);
+        const decryptedTokenObject = JSON.parse(stringedToken);
+
+        const payload = (await verifyPasswordToken(decryptedTokenObject.resetToken)) as JwtPayload;
+
+        if (payload.exp) {
+            if (payload.exp <= Date.now()) {
+                return res.status(498).send("jwt expired");
+            }
+        }
+        return res.status(200);
     } catch (error) {
         if (error instanceof Error) {
             res.send(error.message);
